@@ -1,0 +1,14 @@
+[
+    {
+        "code": "en_US",
+        "locate": "en",
+        "name": "English",
+        "country": "United States"
+    },
+    {
+        "code": "vi_VN",
+        "locate": "vi",
+        "name": "Tiếng Việt",
+        "country": "Việt Nam"
+    }
+]
