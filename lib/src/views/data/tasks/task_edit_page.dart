@@ -1,16 +1,19 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names, no_leading_underscores_for_local_identifiers, unused_local_variable
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
-import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
-import 'package:todoon/src/views/data/tasks/components/task_item.dart';
-import 'package:todoon/src/views/data/tasks/components/tasks_drawer.dart';
+import 'package:todoon/src/routes/routes.dart';
+import 'package:todoon/src/utils/ads_helper.dart';
+import 'package:todoon/src/views/data/tasks/components/tasks_components.dart';
 import 'package:todoon/src/views/widgets/back_button_widget.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
 import 'package:todoon/src/views/widgets/settings_button_widget.dart';
@@ -18,6 +21,7 @@ import 'package:todoon/src/views/widgets/switch_widget.dart';
 import 'package:todoon/src/views/widgets/wrong_widget.dart';
 
 class TaskEditPage extends StatefulWidget {
+  static const routeName = PAGE_TASK;
   final Plan plan;
   final Task task;
 
@@ -33,16 +37,19 @@ class TaskEditPage extends StatefulWidget {
 }
 
 class _TaskEditPageState extends State<TaskEditPage> {
-  Plan get plan => widget.plan;
-  Task get task => widget.task;
+  late Plan plan;
+  late Task task;
+  late DataController dataController;
 
   late ScrollController scrollController;
+  late FocusNode fieldNode;
 
   late TextEditingController textEditingDecription;
   late TextEditingController textEditingDate;
   late TextEditingController textEditingReminder;
   late bool _complete = false;
   late bool _alert = false;
+  DateTime? _dateTime;
 
   double? height;
   double? width;
@@ -50,25 +57,28 @@ class _TaskEditPageState extends State<TaskEditPage> {
   @override
   void initState() {
     super.initState();
-
     scrollController = ScrollController();
+    fieldNode = FocusNode();
+
+    dataController = Provider.of<DataController>(context, listen: false);
+    plan = dataController.dataModel.getPlan(widget.plan.id)!;
+    task = dataController.dataModel.getTask(plan, widget.task.id)!;
 
     textEditingDecription = TextEditingController();
     textEditingDate = TextEditingController();
     textEditingReminder = TextEditingController();
 
-    setState(() {
-      textEditingDecription.text = task.description;
-      textEditingDate.text = DataController.instance.Iso8601toString(task.date);
-      textEditingReminder.text =
-          DataController.instance.Iso8601toString(task.reminder);
-      _complete = task.complete;
-      _alert = task.alert;
-    });
+    textEditingDecription.text = task.description;
+    textEditingDate.text = DataController.instance.Iso8601toString(task.date);
+    textEditingReminder.text =
+        DataController.instance.Iso8601toString(task.reminder);
+    _complete = task.complete;
+    _alert = task.alert;
   }
 
   @override
   void dispose() {
+    fieldNode.dispose();
     scrollController.dispose();
     textEditingDecription.dispose();
     textEditingDate.dispose();
@@ -78,22 +88,31 @@ class _TaskEditPageState extends State<TaskEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => Future.value(true),
-      child: Scaffold(
-        appBar: AppBar(
-          // ignore: prefer_const_constructors
-          leading: BackButtonWidget(),
-          title: Text(plan.name.toString()),
-          // ignore: prefer_const_literals_to_create_immutables
-          actions: [
-            // ignore: prefer_const_constructors
-            SettingsButtonWidget(),
-          ],
-        ),
-        drawer: DrawerWidget(content: _buildDrawer(context)),
-        body: SingleChildScrollView(child: _bodyTask(context)),
-      ),
+    return Consumer<DataController>(
+      builder: (context, dataController, child) {
+        return WillPopScope(
+          onWillPop: () => Future.value(true),
+          child: GestureDetector(
+            onTap: () => fieldNode.unfocus(),
+            child: Scaffold(
+              appBar: AppBar(
+                // ignore: prefer_const_constructors
+                leading: BackButtonWidget(),
+                title: Text(plan.name.toString()),
+                // ignore: prefer_const_literals_to_create_immutables
+                actions: [
+                  _EditPlan(context, widget.plan),
+                  // ignore: prefer_const_constructors
+                  SettingsButtonWidget(),
+                ],
+              ),
+              drawer: DrawerWidget(
+                  content: _buildDrawer(context), focusNode: fieldNode),
+              body: SingleChildScrollView(child: _bodyTask(context)),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -101,15 +120,33 @@ class _TaskEditPageState extends State<TaskEditPage> {
   // View Widgets  ////////////
   // View Widgets /////////////
   /////////////////////////////
+  ///
+  ///
+  Widget _adsContainer(BuildContext context) {
+    if (Platform.isAndroid) {
+      final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
+      return Card(
+        child: SizedBox(
+          height: 100,
+          child: AdWidget(
+            ad: _bannerAd,
+          ),
+        ),
+      );
+    } else {
+      return Container();
+    }
+  }
 
   _buildDrawer(BuildContext context) {
     final tasks = plan.tasks;
     // ignore: avoid_unnecessary_containers
     return TasksDrawer(
-        plan: plan,
-        tasks: tasks,
-        task: task,
-        scrollController: scrollController);
+      plan: plan,
+      tasks: tasks,
+      task: task,
+      scrollController: scrollController,
+    );
   }
 
   Widget _bodyTask(BuildContext context) {
@@ -119,46 +156,41 @@ class _TaskEditPageState extends State<TaskEditPage> {
     return Column(
       children: <Widget>[
         // Content of the task.
-        GestureDetector(
-          onTap: () {
-            FocusScopeNode currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus) {
-              currentFocus.unfocus();
-            }
-          },
-          child: Card(
-            child: Column(
-              children: <Widget>[
-                _TaskDecription(context),
-                _TaskDate(context),
-                _TaskReminder(context),
-                // const Divider(thickness: 3, indent: 20, endIndent: 20),
-                Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    _TaskComplete(context),
-                    _TaskAlert(context),
-                  ],
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
+        Card(
+          child: Column(
+            children: <Widget>[
+              _TaskDecription(context),
+              _TaskDate(context),
+              _TaskReminder(context),
+              // const Divider(thickness: 3, indent: 20, endIndent: 20),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  _TaskComplete(context),
+                  //_TaskAlert(context),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
         ),
         // Action edit task.
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            const SizedBox(width: 10),
-            _CancelEdit(context),
-            const SizedBox(width: 8),
-            _AcceptEdit(context),
-            const SizedBox(width: 10),
-          ],
+        const SizedBox(height: 8),
+        SafeArea(
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              _CancelEdit(context),
+              const SizedBox(width: 8),
+              _AcceptEdit(context),
+            ],
+          ),
         ),
+        const SizedBox(height: 8),
+        _adsContainer(context),
       ],
     );
   }
@@ -170,6 +202,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
       maxLines: 1,
       minLines: 1,
       controller: textEditingDecription,
+      focusNode: fieldNode,
       hintText: Language.instance.New_Task,
     );
   }
@@ -183,9 +216,10 @@ class _TaskEditPageState extends State<TaskEditPage> {
         maxLines: 1,
         readOnly: true,
         controller: textEditingDate,
+        keyboardType: TextInputType.datetime,
         child: IconButton(
           onPressed: () => changeDate(context),
-          icon: const Icon(Icons.calendar_month_outlined),
+          icon: const Icon(Icons.event_available_outlined),
         ),
       ),
       onTap: () => changeDate(context),
@@ -201,9 +235,10 @@ class _TaskEditPageState extends State<TaskEditPage> {
         maxLines: 1,
         readOnly: true,
         controller: textEditingReminder,
+        keyboardType: TextInputType.datetime,
         child: IconButton(
           onPressed: () => changeReminder(context),
-          icon: const Icon(Icons.event_available_outlined),
+          icon: const Icon(Icons.alarm),
         ),
       ),
       onTap: () => changeReminder(context),
@@ -218,10 +253,12 @@ class _TaskEditPageState extends State<TaskEditPage> {
         activeText: Language.instance.Complete,
         inactiveText: Language.instance.Off,
         width: 135,
-        onChanged: (value) {
+        onChanged: (value) async {
           setState(() {
             _complete = value;
           });
+
+          await updateATask(context);
         });
   }
 
@@ -234,16 +271,32 @@ class _TaskEditPageState extends State<TaskEditPage> {
         inactiveText: Language.instance.Off,
         width: 130,
         onChanged: (value) async {
-          await changeAlert(context);
           setState(() {
             _alert = value;
           });
+
+          await changeAlert(context);
         });
   }
 
+  Widget _TaskReminderAlert(BuildContext context) {
+    return TaskItem(
+      title: Language.instance.Reminder,
+      minLines: 1,
+      maxLines: 1,
+      readOnly: true,
+      child: IconButton(
+        icon: const Icon(Icons.alarm),
+        onPressed: () {},
+      ),
+    );
+  }
+
   Widget _CancelEdit(BuildContext context) {
-    return SizedBox(
-      width: 125,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: width! / 2 - 20,
+      ),
       child: ElevatedButton.icon(
         onPressed: () => Navigator.of(context).pop(),
         icon: const Icon(Icons.cancel),
@@ -253,17 +306,26 @@ class _TaskEditPageState extends State<TaskEditPage> {
   }
 
   Widget _AcceptEdit(BuildContext context) {
-    return SizedBox(
-      width: 150,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: width! / 2 - 20,
+      ),
       child: ElevatedButton.icon(
         onPressed: () async {
           await acceptEditTask(context);
         },
         icon: const Icon(Icons.edit_note),
-        label: Text(Language.instance.Edit_Task),
+        label: Text(Language.instance.OK),
         style: Themes.instance.AddButtonStyle,
       ),
     );
+  }
+
+  Widget _EditPlan(BuildContext context, Plan plan) {
+    return IconButton(
+        tooltip: Language.instance.Edit_Plan,
+        onPressed: () => editPlan(context, plan),
+        icon: const Icon(Icons.edit));
   }
 
   /////////////////////////////
@@ -293,7 +355,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
     DatePicker.showDateTimePicker(
       context,
       showTitleActions: true,
-      minTime: currentTime,
+      minTime: currentTime.add(const Duration(minutes: 1)),
       maxTime: DateTime(2050, 12, 31),
       locale: Language.instance.getLocaleType,
       theme: Themes.instance.DatetimePickerTheme,
@@ -307,84 +369,163 @@ class _TaskEditPageState extends State<TaskEditPage> {
     );
   }
 
-  Future<void> acceptEditTask(BuildContext context) async {
-    final dataController = context.read<DataController>();
+  Future<void> editPlan(BuildContext context, Plan plan) async {
+    final planController = TextEditingController();
+    planController.text = plan.name;
 
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) => EditPlan(
+          controller: planController,
+          onEdit: () async {
+            final name = planController.text;
+            final done = await dataController.editAPlan(plan, name);
+
+            if (context.mounted) {
+              if (done.compareTo(States.TRUE) == 0) {
+                Navigator.of(context).pop(true);
+              } else {
+                Navigator.of(context).pop(false);
+                wrongWidget(context);
+              }
+            }
+          },
+          onCancel: () => Navigator.of(context).pop(false)),
+    );
+  }
+
+  Future<void> acceptEditTask(BuildContext context) async {
     await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(Language.instance.Edit_Task),
-            actionsAlignment: MainAxisAlignment.center,
-            content: Text(Language.instance.Edit_Sure),
-            actions: [
-              // Cancel edit task.
-              ElevatedButton.icon(
-                onPressed: () => Navigator.of(context).pop(false),
-                icon: const Icon(Icons.cancel),
-                label: Text(Language.instance.Cancel),
-              ),
-              // Accept edit task.
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final _description = textEditingDecription.text;
-                  final _date =
-                      dataController.StringtoIso8601(textEditingDate.text);
-                  final _reminder =
-                      dataController.StringtoIso8601(textEditingReminder.text);
+          return AlertEditTask(
+              onEdit: () async {
+                final done = await updateATask(context);
+                if (context.mounted) {
+                  switch (done) {
+                    case States.TRUE:
+                      {
+                        Navigator.of(context).pop(true);
+                        // Show snackbar.
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                            '${Language.instance.Complete} ${Language.instance.Edit}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                          margin: const EdgeInsets.all(10),
+                          duration: const Duration(seconds: 1),
+                        ));
+                      }
+                      break;
+                    case States.FALSE:
+                      {
+                        Navigator.of(context).pop(false);
+                        break;
+                      }
 
-                  final _task = Task(
-                      id: task.id,
-                      description: _description,
-                      date: _reminder,
-                      reminder: _reminder,
-                      complete: _complete,
-                      alert: _alert);
-
-                  if (_description.isNotEmpty && _date.isNotEmpty) {
-                    final int up =
-                        dataController.dataModel.updateTask(plan, _task);
-
-                    if (up == 0) Navigator.of(context).pop(false);
-
-                    if (up == 1) {
-                      Navigator.of(context).pop(true);
-                      await dataController.writeData().then(
-                            (value) => setState(
-                              () => ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text(
-                                  '${Language.instance.Complete} ${Language.instance.Edit}',
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                                margin: const EdgeInsets.all(10),
-                                duration: const Duration(seconds: 1),
-                              )),
-                            ),
-                          );
-                    }
-                  } else {
-                    Navigator.of(context).pop(false);
-                    wrongWidget(context);
+                    default:
+                      {
+                        Navigator.of(context).pop(false);
+                        wrongWidget(context);
+                        break;
+                      }
                   }
-                },
-                icon: const Icon(Icons.edit_note),
-                label: Text(Language.instance.Edit_Task),
-                style: Themes.instance.AddButtonStyle,
-              ),
-            ],
-          );
+                }
+              },
+              onCancel: () => Navigator.of(context).pop(false));
         });
   }
 
-  Future<void> changeAlert(BuildContext context) async {
-    final noticesController = context.read<NotificationsController>();
-    final Map<String, String> payload = {
-      'plan': plan.id.toString(),
-      'task': task.id.toString()
-    };
+  Future<String> updateATask(BuildContext context) async {
+    final _description = textEditingDecription.text;
+    final _date = dataController.StringtoIso8601(textEditingDate.text);
+    final _reminder = dataController.StringtoIso8601(textEditingReminder.text);
 
-    noticesController.createTaskReminderNotification(plan, task);
+    final _task = Task(
+        id: task.id,
+        description: _description,
+        date: _date,
+        reminder: _reminder,
+        complete: _complete,
+        alert: task.alert);
+
+    return await dataController.editATask(plan, _task);
   }
+
+  Future<void> changeAlert(BuildContext context) async {
+    if (_alert) {
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertNoticeTask(
+                content: Container(
+                  child: _TaskReminderAlert(context),
+                ),
+                onNotice: () async {
+                  if (_dateTime != null) {
+                    final _description = textEditingDecription.text;
+                    final _date =
+                        dataController.StringtoIso8601(textEditingDate.text);
+                    final _reminder = dataController.StringtoIso8601(
+                        textEditingReminder.text);
+
+                    final _task = Task(
+                        id: task.id,
+                        description: _description,
+                        date: _date,
+                        reminder: _reminder,
+                        complete: _complete,
+                        alert: _alert);
+                    final done = await dataController.editATask(plan, _task);
+
+                    if (context.mounted && done.compareTo(States.TRUE) == 0) {
+                      // Create a notification.
+
+                      Navigator.of(context).pop();
+                      // Show snackbar.
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                          '${Language.instance.Alert} ${Language.instance.Task}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(10),
+                        duration: const Duration(seconds: 1),
+                      ));
+                    }
+                  } else {
+                    // Show snackbar.
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                        Language.instance.Wrong,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(10),
+                      duration: const Duration(seconds: 1),
+                    ));
+                  }
+                },
+                onCancel: () {
+                  Navigator.of(context).pop(false);
+                  setState(() {
+                    _alert = false;
+                  });
+                });
+          });
+    } else {
+      // Show snackbar.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          '${Language.instance.Alert} ${Language.instance.Cancel}',
+          overflow: TextOverflow.ellipsis,
+        ),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        duration: const Duration(seconds: 1),
+      ));
+    }
+  }
+//end code
 }

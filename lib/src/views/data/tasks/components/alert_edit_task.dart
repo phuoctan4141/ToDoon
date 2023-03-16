@@ -1,43 +1,29 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignore_for_file: public_member_api_docs, sort_constructors_first, prefer_const_constructors_in_immutables
 import 'package:flutter/material.dart';
-
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
-class AddPLan extends StatelessWidget {
-  final TextEditingController controller;
-
-  final VoidCallback onAdd;
+class AlertEditTask extends StatelessWidget {
+  final VoidCallback onEdit;
   final VoidCallback onCancel;
 
-  // ignore: prefer_const_constructors_in_immutables
-  AddPLan({
+  AlertEditTask({
     Key? key,
-    required this.controller,
-    required this.onAdd,
+    required this.onEdit,
     required this.onCancel,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(Language.instance.Add_Plan),
-      content: TextField(
-        minLines: 1,
-        maxLength: 128,
-        controller: controller,
-        onEditingComplete: () => FocusScope.of(context).nextFocus(),
-        decoration: InputDecoration(
-          label: Text(Language.instance.Name_Plan),
-          hintText: Language.instance.New_Plan,
-          border: const OutlineInputBorder(),
-        ),
-      ),
+      title: Text(Language.instance.Edit_Task),
+      content: Text(Language.instance.Edit_Sure),
       actionsPadding:
           const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
-      actionsOverflowAlignment: OverflowBarAlignment.end,
       actionsAlignment: MainAxisAlignment.center,
-      actions: <Widget>[
+      actionsOverflowAlignment: OverflowBarAlignment.end,
+      actions: [
+        // Cancel edit task.
         ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: 120,
@@ -48,14 +34,15 @@ class AddPLan extends StatelessWidget {
             label: Text(Language.instance.Cancel),
           ),
         ),
+        // Accept edit task.
         ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: 120,
           ),
           child: ElevatedButton.icon(
-            onPressed: onAdd,
-            icon: const Icon(Icons.format_list_bulleted_add),
-            label: Text(Language.instance.Add_Plan),
+            onPressed: onEdit,
+            icon: const Icon(Icons.edit_note),
+            label: Text(Language.instance.OK),
             style: Themes.instance.AddButtonStyle,
           ),
         ),

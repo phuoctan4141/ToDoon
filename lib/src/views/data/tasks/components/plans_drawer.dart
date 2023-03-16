@@ -45,14 +45,9 @@ class PlansDrawer extends StatelessWidget {
                 leading: CircleAvatar(child: Text(plan.name[0])),
                 title: Text(plans[index].name),
                 onTap: () {
-                  Navigator.pop(context);
                   if (plans[index].id != plan.id) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TasksPage(plan: plans[index]),
-                      ),
-                    );
+                    Navigator.popAndPushNamed(context, TasksPage.routeName,
+                        arguments: plans[index]);
                   }
                 },
               );

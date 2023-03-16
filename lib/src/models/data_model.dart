@@ -1,7 +1,10 @@
 // ignore_for_file: prefer_final_fields, no_leading_underscores_for_local_identifiers, unused_local_variable, unused_field
 
 import 'package:collection/collection.dart';
+import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
+
+enum TaskState { not, com, dead }
 
 /// [Handle] and [Repository] Data.
 class DataModel implements PlanModel, TasksModel {
@@ -44,6 +47,42 @@ class DataModel implements PlanModel, TasksModel {
         TasksList(tasks: List.unmodifiable(_inMemoryCache.plans[index].tasks));
 
     return tasksList;
+  }
+
+  /// Not complete tasksList.
+  TasksList notTasksList(TasksList taskList) {
+    final notTasks = taskList.tasks.where((element) {
+      final now = DateTime.now();
+      final due = DataController.instance.Iso8601toDateTime(element.date);
+      if (due != null) {
+        return element.complete == false && due.isAfter(now);
+      }
+      return element.complete == false;
+    }).toList();
+    final _tasksList = TasksList(tasks: notTasks);
+
+    return _tasksList;
+  }
+
+  /// Complete tasksList.
+  TasksList comTasksList(TasksList taskList) {
+    final comTasks =
+        taskList.tasks.where((element) => element.complete == true).toList();
+    final _tasksList = TasksList(tasks: comTasks);
+
+    return _tasksList;
+  }
+
+  /// Deadline tasksList.
+  TasksList deadTasksList(TasksList taskList) {
+    final comTasks = taskList.tasks.where((element) {
+      final now = DateTime.now();
+      final due = DataController.instance.Iso8601toDateTime(element.date);
+      return due?.isBefore(now) == true && element.complete == false;
+    }).toList();
+    final _tasksList = TasksList(tasks: comTasks);
+
+    return _tasksList;
   }
 
   //////////////////////////////
@@ -194,6 +233,7 @@ class DataModel implements PlanModel, TasksModel {
     if (_indexTask == -1) return 3;
 
     final _old = _storage.plans[_indexPLan].tasks[_indexTask];
+
     // If [_old] is [different] from [task], then update.
     if (_old.description != task.description ||
         _old.date != task.date ||

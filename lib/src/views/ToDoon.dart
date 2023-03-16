@@ -1,16 +1,16 @@
 // ignore_for_file: file_names, prefer_const_constructors
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/constants/strings.dart';
+import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
-import 'package:todoon/src/views/data/plans/plans_page.dart';
+import 'package:todoon/src/routes/routes.dart';
 
 class ToDoon extends StatefulWidget {
   // The navigator key is necessary to navigate using static methods.
@@ -24,15 +24,15 @@ class ToDoon extends StatefulWidget {
 }
 
 class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
+  get currentContext => ToDoon.navigatorKey.currentContext;
+  get currentState => ToDoon.navigatorKey.currentState;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (Platform.isAndroid) {
-      final noticesController = context.read<NotificationsController>();
-      noticesController.allowNotices(context);
-      NotificationsController.startListeningNotificationEvents();
-    }
+    NotificationsController.initializeNotificationsEventListeners();
+    fetandhandleData(context);
   }
 
   @override
@@ -43,8 +43,14 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
 
   @override
   void didChangePlatformBrightness() {
-    Themes.instance.update().then((_) => setState(() {}));
+    context.read<Themes>().update();
     super.didChangePlatformBrightness();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    print('life: $state');
   }
 
   // Build ToDoon application.
@@ -53,12 +59,17 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
     final themes = Provider.of<Themes>(context, listen: true);
     final language = Provider.of<Language>(context, listen: true);
 
+    String initialRoute = PAGE_HOME;
+
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: Strings.NAME_APP,
       theme: themes.lightTheme,
       darkTheme: themes.darkTheme,
       themeMode: themes.current,
       navigatorKey: ToDoon.navigatorKey,
+      routes: materialRoutes,
+      initialRoute: initialRoute,
       locale: Locale(language.current.code),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -69,7 +80,14 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
         Locale('en'), // English
         Locale('vi'), // VietNam
       ],
-      home: PlansPage(),
     );
+  }
+
+  void fetandhandleData(BuildContext context) {
+    context.read<DataController>().fetandcreateJsonFile().then((state) {
+      if (state.compareTo(States.isEXIST) == 0) {
+        context.read<DataController>().loadData();
+      }
+    });
   }
 }

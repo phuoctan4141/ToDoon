@@ -13,9 +13,11 @@ class AdsHelper {
 
   /// Initial [Ads] for the application.
   static Future<void> initialize() async {
-    // ignore: unnecessary_null_comparison
-    if (MobileAds.instance == null) {
-      await MobileAds.instance.initialize();
+    if (Platform.isAndroid) {
+      // ignore: unnecessary_null_comparison
+      if (MobileAds.instance == null) {
+        await MobileAds.instance.initialize();
+      }
     }
   }
 

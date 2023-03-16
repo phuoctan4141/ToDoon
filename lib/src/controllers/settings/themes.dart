@@ -138,6 +138,18 @@ class Themes extends AzureVisual with ChangeNotifier {
     }
   }
 
+  Color TaskSectionDeadColor(bool complete) {
+    if (isLightMode) {
+      return complete
+          ? lightTheme.colorScheme.errorContainer
+          : lightTheme.colorScheme.surfaceVariant;
+    } else {
+      return complete
+          ? darkTheme.colorScheme.errorContainer
+          : darkTheme.colorScheme.surfaceVariant;
+    }
+  }
+
   Color TaskItemCompleteColor(bool complete) {
     if (isLightMode) {
       return complete
@@ -284,6 +296,12 @@ class Themes extends AzureVisual with ChangeNotifier {
     );
   }
   // Drawer Visuals
+
+  // PopMenu Visuals
+  Color get PopIconColor {
+    return const Color(0xFFFFFFFF);
+  }
+  // PopMenu Visuals
 
   @override
   // ignore: must_call_super

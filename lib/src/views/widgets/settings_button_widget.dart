@@ -10,13 +10,7 @@ class SettingsButtonWidget extends StatelessWidget {
     return IconButton(
       tooltip: Language.instance.Settings_Title,
       icon: const Icon(Icons.settings),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          // ignore: prefer_const_constructors
-          builder: (context) => SettingsPage(),
-        ),
-      ),
+      onPressed: () => Navigator.pushNamed(context, SettingsPage.routeName),
     );
   }
 }

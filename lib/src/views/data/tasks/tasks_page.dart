@@ -1,25 +1,24 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
-
 import 'package:todoon/src/models/plan/plan_export.dart';
-import 'package:todoon/src/views/data/plans/components/edit_plan.dart';
-import 'package:todoon/src/views/data/tasks/components/add_task.dart';
-import 'package:todoon/src/views/data/tasks/components/menu_task.dart';
-import 'package:todoon/src/views/data/tasks/components/plans_drawer.dart';
-import 'package:todoon/src/views/data/tasks/components/task_title.dart';
+import 'package:todoon/src/routes/routes.dart';
+import 'package:todoon/src/views/data/tasks/components/alert_detete_task.dart';
+import 'package:todoon/src/views/data/tasks/components/tasks_components.dart';
 import 'package:todoon/src/views/data/tasks/task_edit_page.dart';
 import 'package:todoon/src/views/widgets/back_button_widget.dart';
 import 'package:todoon/src/views/widgets/complete_count_tasks.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
 import 'package:todoon/src/views/widgets/empty_icon_widget.dart';
-import 'package:todoon/src/views/widgets/settings_button_widget.dart';
 import 'package:todoon/src/views/widgets/wrong_widget.dart';
 
 class TasksPage extends StatefulWidget {
+  static const routeName = PAGE_PLAN;
   final Plan plan;
 
   // ignore: prefer_const_constructors_in_immutables
@@ -59,30 +58,32 @@ class _TasksPageState extends State<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
-    final dataController = context.read<DataController>();
-    final taskList = dataController.dataModel.getTasksList(widget.plan);
-
-    return WillPopScope(
-      onWillPop: () => Future.value(true),
-      child: Scaffold(
-        appBar: AppBar(
-          // ignore: prefer_const_constructors
-          leading: BackButtonWidget(),
-          title: Text(widget.plan.name.toString()),
-          // ignore: prefer_const_literals_to_create_immutables
-          actions: [
-            _EditPlan(context, widget.plan),
-            // ignore: prefer_const_constructors
-            SettingsButtonWidget(),
-          ],
-        ),
-        drawer: DrawerWidget(content: _buildDrawer(context)),
-        body: Column(children: <Widget>[
-          Expanded(child: _buildTasksList(context, taskList)),
-          SafeArea(child: _completeCountTask(context, taskList))
-        ]),
-        floatingActionButton: _floatingActionButton(context),
-      ),
+    return Consumer<DataController>(
+      builder: (context, dataController, child) {
+        final taskList = dataController.dataModel.getTasksList(widget.plan);
+        return WillPopScope(
+          onWillPop: () => Future.value(true),
+          child: Scaffold(
+            appBar: AppBar(
+              // ignore: prefer_const_constructors
+              leading: BackButtonWidget(),
+              title: Text(widget.plan.name.toString()),
+              // ignore: prefer_const_literals_to_create_immutables
+              actions: [
+                _EditPlan(context, widget.plan),
+                // ignore: prefer_const_constructors
+                _search(context, taskList),
+              ],
+            ),
+            drawer: DrawerWidget(content: _buildDrawer(context)),
+            body: Column(children: <Widget>[
+              Expanded(child: _buildTasksList(context, taskList)),
+              SafeArea(child: _completeCountTask(context, taskList))
+            ]),
+            floatingActionButton: _floatingActionButton(context),
+          ),
+        );
+      },
     );
   }
 
@@ -90,6 +91,17 @@ class _TasksPageState extends State<TasksPage> {
   // View Widgets  ////////////
   // View Widgets /////////////
   /////////////////////////////
+
+  Widget _search(BuildContext context, TasksList taskList) {
+    return IconButton(
+        onPressed: () {
+          showSearch(
+              context: context,
+              delegate: TaskSearchDelegate(widget.plan, taskList));
+        },
+        tooltip: Language.instance.Search,
+        icon: const Icon(Icons.search));
+  }
 
   _buildDrawer(BuildContext context) {
     final plans = context.read<DataController>().dataModel.getAllPlan;
@@ -103,18 +115,51 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _buildTasksList(BuildContext context, TasksList taskList) {
-    final tasks = taskList.tasks;
-
-    return tasks.isEmpty
+    return taskList.tasks.isEmpty
         // ignore: prefer_const_constructors
         ? Center(child: EmptyIconWidget())
-        : ListView.builder(
+        : _buildContentTaskstList(context, taskList);
+  }
+
+  _buildContentTaskstList(BuildContext context, TasksList taskList) {
+    final notTasksList =
+        DataController.instance.dataModel.notTasksList(taskList);
+    final comTasksList =
+        DataController.instance.dataModel.comTasksList(taskList);
+    final deadasksList =
+        DataController.instance.dataModel.deadTasksList(taskList);
+
+    return SingleChildScrollView(
+      controller: scrollController,
+      child: Column(
+        children: <Widget>[
+          // Deadline tasksList.
+          ListView.builder(
             clipBehavior: Clip.antiAlias,
-            controller: scrollController,
-            itemCount: tasks.length,
+            shrinkWrap: true,
+            itemCount: deadasksList.tasks.length,
             itemBuilder: (context, indexTask) =>
-                _buildTaskTile(context, tasks, indexTask),
-          );
+                _buildTaskTile(context, deadasksList.tasks, indexTask),
+          ),
+          // Not complete tasks.
+          ListView.builder(
+            clipBehavior: Clip.antiAlias,
+            shrinkWrap: true,
+            itemCount: notTasksList.tasks.length,
+            itemBuilder: (context, indexTask) =>
+                _buildTaskTile(context, notTasksList.tasks, indexTask),
+          ),
+          // Complete task.
+          ListView.builder(
+            clipBehavior: Clip.antiAlias,
+            shrinkWrap: true,
+            itemCount: comTasksList.tasks.length,
+            itemBuilder: (context, indexTask) =>
+                _buildTaskTile(context, comTasksList.tasks, indexTask),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTaskTile(BuildContext context, List<Task> tasks, int indexTask) {
@@ -124,38 +169,19 @@ class _TasksPageState extends State<TasksPage> {
       task: task,
       onDismissed: (_) async => dismissTask(context, task),
       onChanged: (p0) async {
-        final dataController = context.read<DataController>();
-        task.complete = p0 ?? false;
-        dataController.dataModel.updateTask(widget.plan, task);
-        await dataController.writeData().then((value) => setState(() {}));
+        changeComplete(context, task, p0);
       },
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          // ignore: prefer_const_constructors
-          builder: (context) => TaskEditPage(
-            plan: widget.plan,
-            task: task,
-          ),
-        ),
-      ).then((value) => setState(() {})),
+      onTap: () => _routeTask(context, task),
       trailing: _menuTask(context, task),
     );
   }
 
   Widget _menuTask(BuildContext context, Task task) {
     return MenuTask(
-        onEdit: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                // ignore: prefer_const_constructors
-                builder: (context) => TaskEditPage(
-                  plan: widget.plan,
-                  task: task,
-                ),
-              ),
-            ).then((value) => setState(() {})),
-        onDelete: () => deleteTask(context, task));
+      complete: task.complete,
+      onEdit: () => _routeTask(context, task),
+      onDelete: () => deleteTask(context, task),
+    );
   }
 
   Widget _floatingActionButton(BuildContext context) {
@@ -167,7 +193,7 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   // ignore: non_constant_identifier_names
-  _EditPlan(BuildContext context, Plan plan) {
+  Widget _EditPlan(BuildContext context, Plan plan) {
     return IconButton(
         tooltip: Language.instance.Edit_Plan,
         onPressed: () => editPlan(context, plan),
@@ -176,29 +202,18 @@ class _TasksPageState extends State<TasksPage> {
 
   // ignore: unused_element
   Widget _confirmDelete(BuildContext context) {
-    return AlertDialog(
-      title: Text(Language.instance.Delete_Task),
-      content: Text(Language.instance.Delete_Sure),
-      actionsAlignment: MainAxisAlignment.center,
-      actions: <Widget>[
-        ElevatedButton.icon(
-            style: Themes.instance.DismissButtonStyle,
-            onPressed: () => Navigator.of(context).pop(true),
-            icon: const Icon(Icons.delete),
-            label: Text(Language.instance.Delete_Task)),
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(false),
-          icon: const Icon(Icons.cancel),
-          label: Text(Language.instance.Cancel),
-        ),
-      ],
-    );
+    return const AlertDeleteTask();
   }
 
   /////////////////////////////
   // View handle  /////////////
   // View handle //////////////
   /////////////////////////////
+
+  _routeTask(BuildContext context, Task task) {
+    Navigator.pushNamed(context, TaskEditPage.routeName,
+        arguments: TaskPageArguments(widget.plan, task));
+  }
 
   Future<void> editPlan(BuildContext context, Plan plan) async {
     final dataController = context.read<DataController>();
@@ -211,16 +226,15 @@ class _TasksPageState extends State<TasksPage> {
           controller: planController,
           onEdit: () async {
             final name = planController.text;
-            if (name.isEmpty) {
-              Navigator.of(context).pop(false);
-              wrongWidget(context);
-            } else {
-              plan.name = name;
-              dataController.dataModel.updatePlan(plan);
-              Navigator.of(context).pop(true);
-              await dataController.writeData().then((value) => setState(() {
-                    planController.dispose();
-                  }));
+            final done = await dataController.editAPlan(plan, name);
+
+            if (context.mounted) {
+              if (done.compareTo(States.TRUE) == 0) {
+                Navigator.of(context).pop(true);
+              } else {
+                Navigator.of(context).pop(false);
+                wrongWidget(context);
+              }
             }
           },
           onCancel: () => Navigator.of(context).pop(false)),
@@ -246,15 +260,16 @@ class _TasksPageState extends State<TasksPage> {
           final reminder =
               dataController.StringtoIso8601(textEditingReminder.text);
 
-          if (decription.isNotEmpty && date.isNotEmpty) {
-            Navigator.of(context).pop(true);
-            dataController.dataModel.createTask(widget.plan,
-                description: decription, date: date, reminder: reminder);
+          final done = await dataController.addNewTask(widget.plan,
+              description: decription, date: date, reminder: reminder);
 
-            await dataController.writeData().then((value) => setState(() {}));
-          } else {
-            Navigator.of(context).pop(false);
-            wrongWidget(context);
+          if (context.mounted) {
+            if (done.compareTo(States.TRUE) == 0) {
+              Navigator.of(context).pop(true);
+            } else {
+              Navigator.of(context).pop(false);
+              wrongWidget(context);
+            }
           }
         },
         onCancel: () => Navigator.of(context).pop(false),
@@ -262,24 +277,29 @@ class _TasksPageState extends State<TasksPage> {
     );
   }
 
+  Future<void> changeComplete(BuildContext context, Task task, bool? p0) async {
+    setState(() {
+      task.complete = p0 ?? false;
+    });
+    await context.read<DataController>().writeData();
+  }
+
   Future<void> dismissTask(BuildContext context, Task task) async {
     final dataController = context.read<DataController>();
-    dataController.dataModel.deleteTask(widget.plan, task);
+    final done = await dataController.deleteATask(widget.plan, task);
 
-    await dataController.writeData().then(
-          (value) => setState(() {
-            // showSnackBar.
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(
-                '${task.description} ${Language.instance.Task_Dismissed}',
-                overflow: TextOverflow.ellipsis,
-              ),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(10),
-              duration: const Duration(seconds: 1),
-            ));
-          }),
-        );
+    if (context.mounted && done.compareTo(States.TRUE) == 0) {
+      // showSnackBar.
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          '${task.description} ${Language.instance.Task_Dismissed}',
+          overflow: TextOverflow.ellipsis,
+        ),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        duration: const Duration(seconds: 1),
+      ));
+    }
   }
 
   Future<void> deleteTask(BuildContext context, Task task) async {
@@ -290,22 +310,113 @@ class _TasksPageState extends State<TasksPage> {
         builder: (BuildContext context) => _confirmDelete(context));
 
     if (isConfirmDelete) {
-      dataController.dataModel.deleteTask(widget.plan, task);
+      final done = await dataController.deleteATask(widget.plan, task);
 
-      await dataController.writeData().then(
-            (value) => setState(() {
-              // showSnackBar.
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(
-                  '${Language.instance.Delete_Task} ${task.description}',
-                  overflow: TextOverflow.ellipsis,
-                ),
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(10),
-                duration: const Duration(seconds: 1),
-              ));
-            }),
-          );
+      if (context.mounted && done.compareTo(States.TRUE) == 0) {
+        // showSnackBar.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            '${Language.instance.Delete_Task} ${task.description}',
+            overflow: TextOverflow.ellipsis,
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 1),
+        ));
+      }
     }
   }
+//end code
+}
+
+/// Task search delegate.
+class TaskSearchDelegate extends SearchDelegate {
+  final Plan plan;
+  final TasksList taskList;
+
+  TaskSearchDelegate(
+    this.plan,
+    this.taskList,
+  ) : super(
+          searchFieldLabel: Language.instance.Search,
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.search,
+        );
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+          onPressed: () {
+            query = '';
+          },
+          tooltip: Language.instance.Refresh,
+          icon: const Icon(Icons.replay))
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          close(context, null);
+        },
+        tooltip: Language.instance.Back,
+        icon: const Icon(Icons.arrow_back));
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    List<Task> matchQuery = [];
+    for (var task in taskList.tasks) {
+      if (task.description.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(task);
+      }
+    }
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var task = matchQuery[index];
+        return ListTile(
+          leading: CircleAvatar(
+              backgroundColor:
+                  Themes.instance.DrawerItemCompleteContentColor(task.complete),
+              child: Text(plan.name[0])),
+          title: Text(task.description,
+              style: Themes.instance.DrawerItemContentTextStyle(task.complete)),
+          onTap: () => Navigator.pushNamed(context, TaskEditPage.routeName,
+              arguments: TaskPageArguments(plan, task)),
+        );
+      },
+      itemCount: matchQuery.length,
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<Task> matchQuery = [];
+
+    for (var task in taskList.tasks) {
+      if (task.description.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(task);
+      }
+    }
+
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var task = matchQuery[index];
+        return ListTile(
+          leading: CircleAvatar(
+              backgroundColor:
+                  Themes.instance.DrawerItemCompleteContentColor(task.complete),
+              child: Text(plan.name[0])),
+          title: Text(task.description,
+              style: Themes.instance.DrawerItemContentTextStyle(task.complete)),
+          onTap: () => Navigator.pushNamed(context, TaskEditPage.routeName,
+              arguments: TaskPageArguments(plan, task)),
+        );
+      },
+      itemCount: matchQuery.length,
+    );
+  }
+//end code
 }

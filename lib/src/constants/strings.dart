@@ -5,7 +5,6 @@ class Strings {
   static const String FOLDER_APP = 'todoon';
   static const String DATA_FILE = 'data.json';
   static const String SETTINGS_FILE = 'settings.json';
-
   late String Add;
   late String Add_Plan;
   late String Add_Task;
@@ -37,6 +36,7 @@ class Strings {
   late String No_Plans;
   late String No_Tasks;
   late String Off;
+  late String OK;
   late String On;
   late String Out_Of;
   late String Plan;
@@ -44,7 +44,9 @@ class Strings {
   late String Plans;
   late String Quick_Add_Plan;
   late String Quick_Add_Task;
+  late String Refresh;
   late String Reminder;
+  late String Search;
   late String Setting_Azure_Title;
   late String Setting_Bleed_Title;
   late String Setting_Colors_Title;

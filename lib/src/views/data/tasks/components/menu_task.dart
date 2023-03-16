@@ -1,16 +1,22 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable
 import 'package:flutter/material.dart';
+
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/controllers/settings/themes.dart';
 
 // ignore: camel_case_types, constant_identifier_names
 enum onFunc { Edit, Delete }
 
 class MenuTask extends StatelessWidget {
+  Widget? icon;
+  bool complete;
   VoidCallback onEdit;
   VoidCallback onDelete;
 
   MenuTask({
     Key? key,
+    this.icon,
+    required this.complete,
     required this.onEdit,
     required this.onDelete,
   }) : super(key: key);
@@ -18,6 +24,9 @@ class MenuTask extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
+      icon: icon ??
+          Icon(Icons.more_vert,
+              color: Themes.instance.TaskItemCompleteColor(complete)),
       tooltip: Language.instance.Show_Menu,
       itemBuilder: (context) => <PopupMenuItem>[
         PopupMenuItem(

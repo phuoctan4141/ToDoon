@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
+import 'package:todoon/src/routes/routes.dart';
 import 'package:todoon/src/views/data/tasks/task_edit_page.dart';
 
 class TasksDrawer extends StatelessWidget {
@@ -60,14 +61,11 @@ class TasksDrawer extends StatelessWidget {
                 style: Themes.instance
                     .DrawerItemContentTextStyle(tasks[index].complete)),
             onTap: () {
-              Navigator.pop(context);
               if (tasks[index].id != task.id) {
-                Navigator.push(
+                Navigator.popAndPushNamed(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        TaskEditPage(plan: plan, task: tasks[index]),
-                  ),
+                  TaskEditPage.routeName,
+                  arguments: TaskPageArguments(plan, tasks[index]),
                 );
               }
             },

@@ -46,19 +46,32 @@ class _SwitchWidgetState extends State<SwitchWidget>
         vsync: this,
         lowerBound: 0.0,
         upperBound: 1.0,
+        value: widget.value ? 1.0 : 0.0,
         duration: widget.duration);
 
-    _circleAnimation = AlignmentTween(
-            begin: widget.value ? Alignment.centerRight : Alignment.centerLeft,
-            end: widget.value ? Alignment.centerLeft : Alignment.centerRight)
-        .animate(CurvedAnimation(
-            parent: _animationController, curve: Curves.easeInOut));
+    _circleAnimation =
+        AlignmentTween(begin: Alignment.centerLeft, end: Alignment.centerRight)
+            .animate(CurvedAnimation(
+                parent: _animationController, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(SwitchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.value == widget.value) return;
+
+    if (widget.value) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
+    }
   }
 
   @override

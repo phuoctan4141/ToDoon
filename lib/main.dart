@@ -17,6 +17,7 @@ import 'package:todoon/src/views/ToDoon.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Inital windows.
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions =
@@ -34,17 +35,17 @@ Future<void> main() async {
   //  Inital Settings
   await SettingsController.initialize();
 
-  // Inital Language
+  // Inital Language.
   final languageData = SettingsController.instance.languageData;
   await Language.initialize(language: languageData);
 
-  // Inital Theme
+  // Inital Theme.
   final themeMode = SettingsController.instance.themeMode;
   final colorMode = SettingsController.instance.colorMode;
   await Themes.initialize(themeMode: themeMode, colorMode: colorMode);
 
   // Inital Notifications.
-  NotificationsController.initialize();
+  NotificationsController.initializeLocalNotifications();
 
   runApp(
     MultiProvider(
@@ -60,9 +61,6 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(
           create: (context) => DataController.instance,
-        ),
-        ChangeNotifierProvider(
-          create: (context) => NotificationsController.instance,
         ),
       ],
       child: Builder(

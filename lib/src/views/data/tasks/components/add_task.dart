@@ -30,7 +30,6 @@ class AddTask extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(Language.instance.Add_Task),
-      actionsAlignment: MainAxisAlignment.center,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -39,21 +38,35 @@ class AddTask extends StatelessWidget {
           children: <Widget>[
             _TaskDecription(context),
             _TaskDate(context),
-            _TaskReminder(context),
+            // _TaskReminder(context),
           ],
         ),
       ),
+      actionsPadding:
+          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
+      actionsOverflowAlignment: OverflowBarAlignment.end,
+      actionsAlignment: MainAxisAlignment.center,
       actions: <Widget>[
-        ElevatedButton.icon(
-          onPressed: onCancel,
-          icon: const Icon(Icons.cancel),
-          label: Text(Language.instance.Cancel),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 120,
+          ),
+          child: ElevatedButton.icon(
+            onPressed: onCancel,
+            icon: const Icon(Icons.cancel),
+            label: Text(Language.instance.Cancel),
+          ),
         ),
-        ElevatedButton.icon(
-          onPressed: onAdd,
-          icon: const Icon(Icons.add_task),
-          label: Text(Language.instance.Add_Task),
-          style: Themes.instance.AddButtonStyle,
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 120,
+          ),
+          child: ElevatedButton.icon(
+            onPressed: onAdd,
+            icon: const Icon(Icons.add_task),
+            label: Text(Language.instance.Add_Task),
+            style: Themes.instance.AddButtonStyle,
+          ),
         ),
       ],
     );
@@ -84,9 +97,10 @@ class AddTask extends StatelessWidget {
         maxLines: 1,
         readOnly: true,
         controller: textEditingDate,
+        keyboardType: TextInputType.datetime,
         child: IconButton(
           onPressed: () => changeDate(context),
-          icon: const Icon(Icons.calendar_month_outlined),
+          icon: const Icon(Icons.event_available_outlined),
         ),
       ),
       onTap: () => changeDate(context),
@@ -104,7 +118,7 @@ class AddTask extends StatelessWidget {
         controller: textEditingReminder,
         child: IconButton(
           onPressed: () => changeReminder(context),
-          icon: const Icon(Icons.event_available_outlined),
+          icon: const Icon(Icons.alarm),
         ),
       ),
       onTap: () => changeReminder(context),

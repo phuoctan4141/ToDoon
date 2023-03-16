@@ -20,7 +20,6 @@ class EditPlan extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(Language.instance.Edit_Plan),
-      actionsAlignment: MainAxisAlignment.center,
       content: TextField(
         minLines: 1,
         maxLength: 128,
@@ -32,17 +31,31 @@ class EditPlan extends StatelessWidget {
           border: const OutlineInputBorder(),
         ),
       ),
+      actionsPadding:
+          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
+      actionsOverflowAlignment: OverflowBarAlignment.end,
+      actionsAlignment: MainAxisAlignment.center,
       actions: <Widget>[
-        ElevatedButton.icon(
-          onPressed: onCancel,
-          icon: const Icon(Icons.cancel),
-          label: Text(Language.instance.Cancel),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 120,
+          ),
+          child: ElevatedButton.icon(
+            onPressed: onCancel,
+            icon: const Icon(Icons.cancel),
+            label: Text(Language.instance.Cancel),
+          ),
         ),
-        ElevatedButton.icon(
-          onPressed: onEdit,
-          icon: const Icon(Icons.edit),
-          label: Text(Language.instance.Edit_Plan),
-          style: Themes.instance.AddButtonStyle,
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 120,
+          ),
+          child: ElevatedButton.icon(
+            onPressed: onEdit,
+            icon: const Icon(Icons.edit),
+            label: Text(Language.instance.OK),
+            style: Themes.instance.AddButtonStyle,
+          ),
         ),
       ],
     );

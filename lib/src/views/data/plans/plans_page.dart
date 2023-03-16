@@ -1,3 +1,5 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
@@ -6,17 +8,16 @@ import 'package:todoon/src/constants/strings.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
-import 'package:todoon/src/views/data/plans/components/add_plan.dart';
-import 'package:todoon/src/views/data/plans/components/edit_plan.dart';
-import 'package:todoon/src/views/data/plans/components/menu_plan.dart';
-import 'package:todoon/src/views/data/plans/components/plan_title.dart';
+import 'package:todoon/src/routes/routes.dart';
+import 'package:todoon/src/views/data/plans/components/alert_delete_plan.dart';
+import 'package:todoon/src/views/data/plans/components/plans_components.dart';
 import 'package:todoon/src/views/data/tasks/tasks_page.dart';
-import 'package:todoon/src/views/settings/settings_page.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
 import 'package:todoon/src/views/widgets/empty_icon_widget.dart';
 import 'package:todoon/src/views/widgets/wrong_widget.dart';
 
 class PlansPage extends StatefulWidget {
+  static const routeName = PAGE_HOME;
   const PlansPage({super.key});
 
   @override
@@ -33,7 +34,7 @@ class _PlansPageState extends State<PlansPage> {
     super.initState();
 
     scrollController = ScrollController();
-    fetandhandleData();
+    fetandhandleData(context);
   }
 
   @override
@@ -44,27 +45,36 @@ class _PlansPageState extends State<PlansPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(Strings.NAME_APP),
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
+    return Consumer<DataController>(
+      builder: (context, dataController, child) {
+        final plansList = dataController.dataModel.getPlansList;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(Strings.NAME_APP),
+            leading: Builder(
+              builder: (BuildContext context) {
+                return IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                  tooltip: Language.instance.Show_Menu,
+                );
               },
-              tooltip: Language.instance.Show_Menu,
-            );
-          },
-        ),
-      ),
-      // ignore: prefer_const_constructors
-      drawer: DrawerWidget(
-        notHome: false,
-      ),
-      body: _bodyPlans(context),
-      floatingActionButton: _floatingActionButton(context),
+            ),
+            actions: [
+              _search(context, plansList),
+            ],
+          ),
+          // ignore: prefer_const_constructors
+          drawer: DrawerWidget(
+            notHome: false,
+          ),
+          body: _bodyPlans(context),
+          floatingActionButton: _floatingActionButton(context),
+        );
+      },
     );
   }
 
@@ -73,25 +83,19 @@ class _PlansPageState extends State<PlansPage> {
   // View Widgets /////////////
   /////////////////////////////
 
-  Widget routeSettings(BuildContext context) {
+  Widget _search(BuildContext context, PlansList plansList) {
     return IconButton(
-      tooltip: Language.instance.Settings_Title,
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            // ignore: prefer_const_constructors
-            builder: (context) => SettingsPage(),
-          ),
-        ).then((_) => fetandhandleData()); // Navigator
-      }, // onPressed
-      icon: const Icon(Icons.settings),
-    );
+        onPressed: () {
+          showSearch(context: context, delegate: PlanSearchDelegate(plansList));
+        },
+        tooltip: Language.instance.Search,
+        icon: const Icon(Icons.search));
   }
 
   // Load data from _inMemoryCache.
   Widget _bodyPlans(BuildContext context) {
-    final plansList = context.read<DataController>().dataModel.getPlansList;
+    final dataController = Provider.of<DataController>(context, listen: false);
+    final plansList = dataController.dataModel.getPlansList;
 
     if (isLoading) {
       return const Center(
@@ -126,15 +130,9 @@ class _PlansPageState extends State<PlansPage> {
 
     return PlanTitle(
       plan: plan,
-      onDismissed: (_) async => dismissPLan(context, plan),
+      onDismissed: (_) async => dismissPlan(context, plan),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            // ignore: prefer_const_constructors
-            builder: (context) => TasksPage(plan: plan),
-          ),
-        ).then((_) => fetandhandleData());
+        _routePlan(context, plan);
       },
       trailing: _menuPlan(context, plan),
     );
@@ -158,23 +156,7 @@ class _PlansPageState extends State<PlansPage> {
 
   // ignore: unused_element
   Widget _confirmDelete(BuildContext context) {
-    return AlertDialog(
-      title: Text(Language.instance.Delete_Plan),
-      content: Text(Language.instance.Delete_Sure),
-      actionsAlignment: MainAxisAlignment.center,
-      actions: <Widget>[
-        ElevatedButton.icon(
-            style: Themes.instance.DismissButtonStyle,
-            onPressed: () => Navigator.of(context).pop(true),
-            icon: const Icon(Icons.delete),
-            label: Text(Language.instance.Delete_Plan)),
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(false),
-          icon: const Icon(Icons.cancel),
-          label: Text(Language.instance.Cancel),
-        ),
-      ],
-    );
+    return const AlertDeletePlan();
   }
 
   /////////////////////////////
@@ -182,15 +164,18 @@ class _PlansPageState extends State<PlansPage> {
   // View handle //////////////
   /////////////////////////////
 
-  void fetandhandleData() {
-    final dataController = context.read<DataController>();
-    dataController.fetandcreateJsonFile().then((state) => setState(() {
-          isLoading = false;
+  void _routePlan(BuildContext context, Plan plan) {
+    Navigator.pushNamed(context, TasksPage.routeName, arguments: plan);
+  }
 
-          if (state.compareTo(States.isEXIST) == 0) {
-            dataController.loadData().then((_) => setState(() {}));
-          }
-        }));
+  Future<void> fetandhandleData(BuildContext context) async {
+    final done = await context.read<DataController>().loadData();
+
+    if (context.mounted && done.compareTo(States.TRUE) == 0) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> addNewPlan(BuildContext context) async {
@@ -203,13 +188,15 @@ class _PlansPageState extends State<PlansPage> {
           controller: planController,
           onAdd: () async {
             final name = planController.text;
-            if (name.isEmpty) {
-              Navigator.of(context).pop(false);
-              wrongWidget(context);
-            } else {
-              dataController.dataModel.createPlan(name: name);
-              Navigator.of(context).pop(true);
-              await dataController.writeData().then((value) => setState(() {}));
+            final done = await dataController.addNewPlan(name);
+
+            if (context.mounted) {
+              if (done.compareTo(States.TRUE) == 0) {
+                Navigator.of(context).pop(true);
+              } else {
+                Navigator.of(context).pop(false);
+                wrongWidget(context);
+              }
             }
           },
           onCancel: () => Navigator.of(context).pop(false)),
@@ -217,9 +204,9 @@ class _PlansPageState extends State<PlansPage> {
   }
 
   Future<void> editPlan(BuildContext context, Plan plan) async {
+    final dataController = context.read<DataController>();
     planController = TextEditingController();
     planController.text = plan.name;
-    final dataController = context.read<DataController>();
 
     await showDialog(
       context: context,
@@ -227,35 +214,33 @@ class _PlansPageState extends State<PlansPage> {
           controller: planController,
           onEdit: () async {
             final name = planController.text;
-            if (name.isEmpty) {
-              Navigator.of(context).pop(false);
-              wrongWidget(context);
-            } else {
-              plan.name = name;
-              dataController.dataModel.updatePlan(plan);
-              Navigator.of(context).pop(true);
-              await dataController.writeData().then((value) => setState(() {}));
+            final done = await dataController.editAPlan(plan, name);
+
+            if (context.mounted) {
+              if (done.compareTo(States.TRUE) == 0) {
+                Navigator.of(context).pop(true);
+              } else {
+                Navigator.of(context).pop(false);
+                wrongWidget(context);
+              }
             }
           },
           onCancel: () => Navigator.of(context).pop(false)),
     );
   }
 
-  Future<void> dismissPLan(BuildContext context, Plan plan) async {
+  Future<void> dismissPlan(BuildContext context, Plan plan) async {
     final dataController = context.read<DataController>();
-    dataController.dataModel.deletePlan(plan);
+    final done = await dataController.deleteAPlan(plan);
 
-    await dataController.writeData().then(
-          (value) => setState(() {
-            // showSnackBar.
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('${plan.name} ${Language.instance.Plan_Dismissed}'),
-              behavior: SnackBarBehavior.floating,
-              margin: const EdgeInsets.all(10),
-              duration: const Duration(seconds: 1),
-            ));
-          }),
-        );
+    if (context.mounted && done.compareTo(States.TRUE) == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${plan.name} ${Language.instance.Plan_Dismissed}'),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        duration: const Duration(seconds: 1),
+      ));
+    }
   }
 
   Future<void> deletePlan(BuildContext context, Plan plan) async {
@@ -266,22 +251,100 @@ class _PlansPageState extends State<PlansPage> {
         builder: (BuildContext context) => _confirmDelete(context));
 
     if (isConfirmDelete ?? false) {
-      dataController.dataModel.deletePlan(plan);
+      final done = await dataController.deleteAPlan(plan);
 
-      await dataController.writeData().then(
-            (value) => setState(() {
-              // showSnackBar.
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content:
-                      Text('${Language.instance.Delete_Plan} ${plan.name}'),
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.all(10),
-                  duration: const Duration(seconds: 1),
-                ),
-              );
-            }),
-          );
+      if (context.mounted && done.compareTo(States.TRUE) == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${Language.instance.Delete_Plan} ${plan.name}'),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(10),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
     }
   }
+//end code
+}
+
+/// Plan search delegate.
+class PlanSearchDelegate extends SearchDelegate {
+  final PlansList plansList;
+
+  PlanSearchDelegate(this.plansList)
+      : super(
+          searchFieldLabel: Language.instance.Search,
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.search,
+        );
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+          onPressed: () {
+            query = '';
+          },
+          tooltip: Language.instance.Refresh,
+          icon: const Icon(Icons.replay))
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          close(context, null);
+        },
+        tooltip: Language.instance.Back,
+        icon: const Icon(Icons.arrow_back));
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    List<Plan> matchQuery = [];
+    for (var plan in plansList.plans) {
+      if (plan.name.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(plan);
+      }
+    }
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var plan = matchQuery[index];
+        return ListTile(
+          leading: CircleAvatar(child: Text(plan.name[0])),
+          title: Text(plan.name),
+          onTap: () => Navigator.pushNamed(context, TasksPage.routeName,
+              arguments: plan),
+        );
+      },
+      itemCount: matchQuery.length,
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<Plan> matchQuery = [];
+
+    for (var plan in plansList.plans) {
+      if (plan.name.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(plan);
+      }
+    }
+
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        var plan = matchQuery[index];
+        return ListTile(
+          leading: CircleAvatar(child: Text(plan.name[0])),
+          title: Text(plan.name),
+          onTap: () => Navigator.pushNamed(context, TasksPage.routeName,
+              arguments: plan),
+        );
+      },
+      itemCount: matchQuery.length,
+    );
+  }
+//end code
 }

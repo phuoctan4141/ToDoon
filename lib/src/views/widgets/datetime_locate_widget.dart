@@ -24,7 +24,7 @@ class DateTimeLocateWidget extends StatelessWidget {
         Row(
           children: [
             Icon(
-              Icons.calendar_month_outlined,
+              Icons.event_available_outlined,
               color: Themes.instance.TaskItemCompleteColor(complete),
             ),
             Text(
@@ -36,7 +36,7 @@ class DateTimeLocateWidget extends StatelessWidget {
         ),
         Row(
           children: [
-            Icon(Icons.event_available_outlined,
+            Icon(Icons.alarm,
                 color: Themes.instance.TaskItemCompleteColor(complete)),
             Text(
               DateTimetoString(reminderString),

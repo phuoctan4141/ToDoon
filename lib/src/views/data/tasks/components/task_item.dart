@@ -8,7 +8,10 @@ class TaskItem extends StatelessWidget {
   int? maxLines;
   int? maxLength;
   bool? readOnly;
+  String? initialValue;
   TextEditingController? controller;
+  TextInputType? keyboardType;
+  FocusNode? focusNode;
   String? label;
   String? hintText;
   Widget? child;
@@ -20,7 +23,10 @@ class TaskItem extends StatelessWidget {
     this.maxLines,
     this.maxLength,
     this.readOnly,
+    this.initialValue,
     this.controller,
+    this.keyboardType,
+    this.focusNode,
     this.label,
     this.hintText,
     this.child,
@@ -59,12 +65,15 @@ class TaskItem extends StatelessWidget {
                     maxLength: maxLength,
                     minLines: minLines,
                     maxLines: maxLines,
+                    initialValue: initialValue,
                     controller: controller,
-                    autocorrect: false,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    obscureText: false,
-                    readOnly: readOnly ?? false,
                     autofocus: true,
+                    autocorrect: false,
+                    obscureText: false,
+                    focusNode: focusNode,
+                    readOnly: readOnly ?? false,
+                    keyboardType: keyboardType,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     textAlignVertical: TextAlignVertical.center,
                     onEditingComplete: () => FocusScope.of(context).nextFocus(),
                     decoration: InputDecoration(

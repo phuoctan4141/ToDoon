@@ -73,17 +73,30 @@ class PlanTitle extends StatelessWidget {
     return AlertDialog(
       title: Text(Language.instance.Dismiss_Plan),
       content: Text(Language.instance.Dismiss_Sure),
+      actionsPadding:
+          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
+      actionsOverflowAlignment: OverflowBarAlignment.end,
       actionsAlignment: MainAxisAlignment.center,
       actions: <Widget>[
-        ElevatedButton.icon(
-            style: Themes.instance.DismissButtonStyle,
-            onPressed: () => Navigator.of(context).pop(true),
-            icon: const Icon(Icons.delete),
-            label: Text(Language.instance.Dismiss_Plan)),
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(false),
-          icon: const Icon(Icons.cancel),
-          label: Text(Language.instance.Cancel),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 120,
+          ),
+          child: ElevatedButton.icon(
+              style: Themes.instance.DismissButtonStyle,
+              onPressed: () => Navigator.of(context).pop(true),
+              icon: const Icon(Icons.delete),
+              label: Text(Language.instance.Dismiss_Plan)),
+        ),
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 120,
+          ),
+          child: ElevatedButton.icon(
+            onPressed: () => Navigator.of(context).pop(false),
+            icon: const Icon(Icons.cancel),
+            label: Text(Language.instance.Cancel),
+          ),
         ),
       ],
     );

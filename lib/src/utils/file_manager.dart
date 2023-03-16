@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:todoon/src/constants/states.dart';
+import 'package:todoon/src/utils/encrypt_data.dart';
 
 class FileManager {
   static final FileManager instance = FileManager();
@@ -46,7 +47,7 @@ class FileManager {
     try {
       final fileContent = await file.readAsString();
       jsonContent = fileContent;
-      return Json.tryDecode(jsonContent);
+      return Json.tryDecode(EncryptData.decryptAES(jsonContent));
     } catch (e) {
       throw Exception(States.CANT_READ_FILE);
     }
@@ -58,7 +59,8 @@ class FileManager {
     File file = await _localFile(folderName, fileName);
 
     try {
-      file.writeAsStringSync(Json.tryEncode(jsonContext).toString());
+      file.writeAsStringSync(
+          EncryptData.encryptAES(Json.tryEncode(jsonContext).toString()));
       return States.TRUE;
     } catch (e) {
       throw Exception(States.CANT_WRITE_FILE);

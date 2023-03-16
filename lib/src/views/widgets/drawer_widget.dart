@@ -13,15 +13,34 @@ import 'package:todoon/src/utils/ads_helper.dart';
 import 'package:todoon/src/views/data/plans/plans_page.dart';
 import 'package:todoon/src/views/settings/settings_page.dart';
 
-class DrawerWidget extends StatelessWidget {
+class DrawerWidget extends StatefulWidget {
   bool notHome;
   Widget? content;
+  FocusNode? focusNode;
 
   DrawerWidget({
     Key? key,
     this.notHome = true,
     this.content,
+    this.focusNode,
   }) : super(key: key);
+
+  @override
+  State<DrawerWidget> createState() => _DrawerWidgetState();
+}
+
+class _DrawerWidgetState extends State<DrawerWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode?.unfocus();
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode?.unfocus();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +54,10 @@ class DrawerWidget extends StatelessWidget {
           _Header(context),
           _Home(context),
           _Settings(context),
-          (content != null)
+          (widget.content != null)
               ? Expanded(
-                  child: Card(child: SingleChildScrollView(child: content)))
+                  child:
+                      Card(child: SingleChildScrollView(child: widget.content)))
               : Container(),
           const SizedBox(height: 3.0),
           _adsContainer(context),
@@ -78,13 +98,8 @@ class DrawerWidget extends StatelessWidget {
         onTap: () {
           Navigator.pop(context);
 
-          if (notHome) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PlansPage(),
-              ),
-            );
+          if (widget.notHome) {
+            Navigator.pushNamed(context, PlansPage.routeName);
           }
         },
       ),
@@ -100,21 +115,15 @@ class DrawerWidget extends StatelessWidget {
         onTap: () {
           Navigator.pop(context);
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsPage(),
-            ),
-          );
+          Navigator.pushNamed(context, SettingsPage.routeName);
         },
       ),
     );
   }
 
   Widget _adsContainer(BuildContext context) {
-    final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
-
     if (Platform.isAndroid) {
+      final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
       return Card(
         child: SizedBox(
           height: 100,

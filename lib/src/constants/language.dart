@@ -112,6 +112,7 @@ class Language extends Strings with ChangeNotifier {
     No_Plans = map['No_Plans']!;
     No_Tasks = map['No_Tasks']!;
     Off = map['Off']!;
+    OK = map['OK']!;
     On = map['On']!;
     Out_Of = map['Out_Of']!;
     Plan = map['Plan']!;
@@ -119,7 +120,9 @@ class Language extends Strings with ChangeNotifier {
     Plans = map['Plans']!;
     Quick_Add_Plan = map['Quick_Add_Plan']!;
     Quick_Add_Task = map['Quick_Add_Task']!;
+    Refresh = map['Refresh']!;
     Reminder = map['Reminder']!;
+    Search = map['Search']!;
     Setting_Azure_Title = map['Setting_Azure_Title']!;
     Setting_Bleed_Title = map['Setting_Bleed_Title']!;
     Setting_Colors_Title = map['Setting_Colors_Title']!;

@@ -8,11 +8,13 @@ import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/controllers/settings/settings_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
+import 'package:todoon/src/routes/routes.dart';
 import 'package:todoon/src/utils/ads_helper.dart';
 import 'package:todoon/src/views/settings/components/settings_section.dart';
 import 'package:todoon/src/views/widgets/back_button_widget.dart';
 
 class SettingsPage extends StatefulWidget {
+  static const routeName = PAGE_SETTINGS;
   const SettingsPage({super.key});
 
   @override
@@ -27,7 +29,6 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-
     // Language list initialization.
     Language.instance.available.then((value) => setState(() {
           available = value;
@@ -36,21 +37,25 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        // ignore: prefer_const_constructors
-        leading: BackButtonWidget(),
-        title: Text(Language.instance.Settings_Title),
-      ),
-      body: ListView(
-        clipBehavior: Clip.antiAlias,
-        children: [
-          _buildThemesSection(context),
-          _buildLanguagesSection(context),
-          _buildColorsSection(context),
-          _adsContainer(context),
-        ],
-      ),
+    return Consumer<SettingsController>(
+      builder: (context, settingsController, child) {
+        return Scaffold(
+          appBar: AppBar(
+            // ignore: prefer_const_constructors
+            leading: BackButtonWidget(),
+            title: Text(Language.instance.Settings_Title),
+          ),
+          body: ListView(
+            clipBehavior: Clip.antiAlias,
+            children: [
+              _buildThemesSection(context),
+              _buildLanguagesSection(context),
+              _buildColorsSection(context),
+              _adsContainer(context),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -60,13 +65,11 @@ class _SettingsPageState extends State<SettingsPage> {
   /////////////////////////////
 
   Widget _adsContainer(BuildContext context) {
-    final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
-
     if (Platform.isAndroid) {
+      final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
       return Card(
         child: SizedBox(
           height: 100,
-          width: 378,
           child: AdWidget(
             ad: _bannerAd,
           ),
@@ -80,8 +83,10 @@ class _SettingsPageState extends State<SettingsPage> {
   // create all of the theme mode sections.
   Widget _buildThemesSection(BuildContext context) {
     // Currently, Theme Mode.
-    late ThemeMode current = context.watch<SettingsController>().themeMode;
-    late ColorMode color = context.read<SettingsController>().colorMode;
+    final settingsController =
+        Provider.of<SettingsController>(context, listen: false);
+    late ThemeMode current = settingsController.themeMode;
+    late ColorMode color = settingsController.colorMode;
 
     return SettingsSection(
       title: Language.instance.Setting_Theme_Title,
@@ -99,8 +104,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   await Themes.instance
                       .set(themeMode: current, colorMode: color);
                   // save setting to storage
-                  SettingsController.instance.themeMode = current;
-                  await SettingsController.instance.saveSetting();
+                  settingsController.themeMode = current;
+                  await settingsController.saveSetting();
                 }
               },
             ),
@@ -123,8 +128,10 @@ class _SettingsPageState extends State<SettingsPage> {
   // create all of the color mode sections.
   Widget _buildColorsSection(BuildContext context) {
     // Currently, Color Mode.
-    late ThemeMode current = context.read<SettingsController>().themeMode;
-    late ColorMode color = context.watch<SettingsController>().colorMode;
+    final settingsController =
+        Provider.of<SettingsController>(context, listen: false);
+    late ThemeMode current = settingsController.themeMode;
+    late ColorMode color = settingsController.colorMode;
 
     return SettingsSection(
       title: Language.instance.Setting_Colors_Title,
@@ -142,8 +149,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   await Themes.instance
                       .set(themeMode: current, colorMode: color);
                   // save setting to storage
-                  SettingsController.instance.colorMode = color;
-                  await SettingsController.instance.saveSetting();
+                  settingsController.colorMode = color;
+                  await settingsController.saveSetting();
                 }
               },
             ),
@@ -163,6 +170,7 @@ class _SettingsPageState extends State<SettingsPage> {
   // Create all of the language sections.
   _buildLanguagesSection(BuildContext context) {
     // Currently, Language.
+    final settingsController = context.read<SettingsController>();
     late LanguageData current = context.watch<Language>().current;
 
     return SettingsSection(
@@ -179,8 +187,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     current = value;
                     await Language.instance.set(value: value);
                     // save setting to storage
-                    SettingsController.instance.languageData = current;
-                    await SettingsController.instance.saveSetting();
+                    settingsController.languageData = current;
+                    await settingsController.saveSetting();
                   }
                 },
               ))
