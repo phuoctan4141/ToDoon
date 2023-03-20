@@ -13,7 +13,7 @@ import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/views/ToDoon.dart';
 import 'package:todoon/src/views/widgets/allow_notices_widget.dart';
 
-class NotificationsController with ChangeNotifier {
+class NotificationsController {
   static final NotificationsController instance = NotificationsController();
   bool _initialized = false;
 
@@ -29,7 +29,7 @@ class NotificationsController with ChangeNotifier {
               channelDescription: 'ToDoon',
               locked: true,
               playSound: true,
-              channelShowBadge: true,
+              //channelShowBadge: true,
               groupAlertBehavior: GroupAlertBehavior.Children,
               importance: NotificationImportance.High,
               defaultPrivacy: NotificationPrivacy.Public,
@@ -58,9 +58,9 @@ class NotificationsController with ChangeNotifier {
   static Future<void> initializeNotificationsEventListeners() async {
     if (Platform.isAndroid) {
       AwesomeNotifications().setListeners(
-        onActionReceivedMethod: instance.onActionReceivedMethod,
+        onActionReceivedMethod: onActionReceivedMethod,
         onNotificationCreatedMethod: onNotificationCreatedMethod,
-        onNotificationDisplayedMethod: instance.onNotificationDisplayedMethod,
+        onNotificationDisplayedMethod: onNotificationDisplayedMethod,
         onDismissActionReceivedMethod: onDismissActionReceivedMethod,
       );
     }
@@ -75,7 +75,7 @@ class NotificationsController with ChangeNotifier {
 
   /// Use this method to detect every time that a new notification is displayed.
   @pragma("vm:entry-point")
-  Future<void> onNotificationDisplayedMethod(
+  static Future<void> onNotificationDisplayedMethod(
       ReceivedNotification receivedNotification) async {
     // Your code goes here
     onDisplayed(receivedNotification);
@@ -90,39 +90,43 @@ class NotificationsController with ChangeNotifier {
 
   /// Use this method to detect when the user taps on a notification or action button.
   @pragma("vm:entry-point")
-  Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(
+      ReceivedAction receivedAction) async {
     // Always ensure that all plugins was initialized.
     WidgetsFlutterBinding.ensureInitialized();
-
-    var life = await AwesomeNotifications().getAppLifeCycle();
-    switch (life) {
-      case NotificationLifeCycle.Foreground:
-        {
-          var currentState = ToDoon.navigatorKey.currentState;
-          if (currentState != null) {
-            // ignore: use_build_context_synchronously
-            var data = Provider.of<DataController>(currentState.context,
-                listen: false);
-
-            data.onComplete(receivedAction);
-          }
-        }
-        break;
-      case NotificationLifeCycle.Background:
-        {
-          onSilentActionHandle(receivedAction);
-        }
-        break;
-      default:
-        {}
-        break;
-    }
-
     // Your code goes here
+    var currentState = ToDoon.navigatorKey.currentState;
+    if (currentState != null) {
+      final life = await AwesomeNotifications().getAppLifeCycle();
+      if (currentState.mounted) {
+        switch (life) {
+          case NotificationLifeCycle.Foreground:
+            {
+              currentState.context
+                  .read<DataController>()
+                  .onComplete(receivedAction);
+            }
+            break;
+          case NotificationLifeCycle.Background:
+            {
+              onSilentActionHandle(receivedAction);
+            }
+            break;
+          case NotificationLifeCycle.AppKilled:
+            {
+              onSilentActionHandle(receivedAction);
+            }
+            break;
+          default:
+            {}
+            break;
+        }
+      }
+    }
   }
 
   static Future<void> onSilentActionHandle(ReceivedAction received) async {
-    print('On new background action received: ${received.toMap()}');
+    print('On new background action received: ${received.actionDate}');
 
     if (!instance._initialized) {
       SendPort? uiSendPort =
@@ -141,10 +145,15 @@ class NotificationsController with ChangeNotifier {
 
   static Future<void> _handleBackgroundAction(ReceivedAction received) async {
     // Your background action handle
-    DataController.instance.onCompleteBackground(received);
+    var currentState = ToDoon.navigatorKey.currentState;
+    if (currentState != null) {
+      currentState.context
+          .read<DataController>()
+          .onCompleteBackground(received);
+    }
   }
 
-  Future<void> onComplete(ReceivedAction receivedAction) async {}
+  static Future<void> onComplete(ReceivedAction receivedAction) async {}
 
   static Future<void> onDisplayed(
       ReceivedNotification receivedNotification) async {
@@ -163,12 +172,18 @@ class NotificationsController with ChangeNotifier {
     // Always ensure that all plugins was initialized.
     WidgetsFlutterBinding.ensureInitialized();
 
+    // Cancel a notification created.
+    cancelScheduledNotificationsById(task.id);
+    // Dismiss a notification displayed.
+    dismissNotificationsById(task.id);
+
     bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
     if (!isAllowed) {
       isAllowed = await AllowNoticesWidget(ToDoon.navigatorKey.currentContext!);
     }
     if (!isAllowed) return;
 
+    // Set a payload.
     Map<String, String> payload = {
       'plan': plan.id.toString(),
       'task': task.id.toString(),
@@ -187,7 +202,7 @@ class NotificationsController with ChangeNotifier {
         _cancelLabel = 'Cancel';
       }
     }
-
+    // Create a notification.
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: task.id,
@@ -200,9 +215,9 @@ class NotificationsController with ChangeNotifier {
       ),
       actionButtons: [
         NotificationActionButton(
-            key: 'COMPLETE',
-            label: _completeLabel,
-            actionType: ActionType.SilentAction),
+            key: 'CANCEL',
+            label: _cancelLabel,
+            actionType: ActionType.DismissAction),
       ],
       schedule: NotificationCalendar.fromDate(date: date),
     );

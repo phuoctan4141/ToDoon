@@ -41,13 +41,15 @@ class FileManager {
 
   /// read and decode jsonFile
   Future<dynamic> readJsonFile(String folderName, String fileName) async {
-    String jsonContent = '[]';
     File file = await _localFile(folderName, fileName);
 
     try {
       final fileContent = await file.readAsString();
-      jsonContent = fileContent;
-      return Json.tryDecode(EncryptData.decryptAES(jsonContent));
+      if (fileContent.isNotEmpty) {
+        return Json.tryDecode(EncryptData.decryptAES(fileContent));
+      } else {
+        return [];
+      }
     } catch (e) {
       throw Exception(States.CANT_READ_FILE);
     }

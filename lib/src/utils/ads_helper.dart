@@ -25,7 +25,7 @@ class AdsHelper {
   BannerAd? getBannerAd() {
     BannerAd bAd = BannerAd(
         adUnitId: _adUnitId,
-        size: AdSize.fluid,
+        size: AdSize.banner,
         listener: BannerAdListener(onAdClosed: (Ad ad) {
           print("Ad Closed");
         }, onAdFailedToLoad: (Ad ad, LoadAdError error) {

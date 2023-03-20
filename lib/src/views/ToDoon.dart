@@ -11,6 +11,7 @@ import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/routes/routes.dart';
+import 'package:todoon/src/views/data/plans/plans_page.dart';
 
 class ToDoon extends StatefulWidget {
   // The navigator key is necessary to navigate using static methods.
@@ -50,7 +51,7 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    print('life: $state');
+    print('AppLifecycleState: $state');
   }
 
   // Build ToDoon application.
@@ -59,7 +60,8 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
     final themes = Provider.of<Themes>(context, listen: true);
     final language = Provider.of<Language>(context, listen: true);
 
-    String initialRoute = PAGE_HOME;
+    String initialRoute =
+        NotificationsController.initialAction == null ? PAGE_HOME : PAGE_PLAN;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -70,6 +72,12 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
       navigatorKey: ToDoon.navigatorKey,
       routes: materialRoutes,
       initialRoute: initialRoute,
+      onGenerateRoute: (settings) {
+        if (settings.name == PAGE_PLAN) {
+          return onAppKilled(context);
+        }
+        return null;
+      },
       locale: Locale(language.current.code),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -90,4 +98,15 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
       }
     });
   }
+
+  MaterialPageRoute onAppKilled(BuildContext context) {
+    var initialAction = NotificationsController.initialAction;
+
+    if (initialAction != null) {
+      return context.read<DataController>().onAppKilled(context, initialAction);
+    } else {
+      return MaterialPageRoute(builder: (_) => const PlansPage());
+    }
+  }
+// end code.
 }

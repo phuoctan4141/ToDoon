@@ -1,5 +1,6 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -9,10 +10,12 @@ import 'package:intl/intl.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/constants/strings.dart';
+import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/models/data_model.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/utils/file_manager.dart';
 import 'package:todoon/src/views/ToDoon.dart';
+import 'package:todoon/src/views/data/plans/plans_page.dart';
 import 'package:todoon/src/views/data/tasks/tasks_page.dart';
 
 /// Control Data application.
@@ -21,7 +24,9 @@ class DataController with ChangeNotifier {
   static DataController instance = DataController();
 
   /// Data Handle Model.
-  final dataModel = DataModel();
+  final DataModel dataModel = DataModel();
+
+  late Stream<DataModel> streamData = const Stream.empty();
 
   /// Initial [data] for the application.
   static Future<void> initialize() async {
@@ -41,6 +46,8 @@ class DataController with ChangeNotifier {
 
       dataModel.setMemoryCache(PlansList.fromJson(jsonResponse));
       dataModel.setStorage(PlansList.fromJson(jsonResponse));
+
+      streamData = Stream.value(dataModel);
 
       state = await FileManager.instance.writeJsonFile(
           Strings.FOLDER_APP, Strings.DATA_FILE, dataModel.getDataStorage);
@@ -64,6 +71,28 @@ class DataController with ChangeNotifier {
       return States.FALSE;
     }
   }
+
+  /// load [streamData] for the dataModel
+  Stream<DataModel> get getStreamData {
+    streamData = Stream.value(dataModel);
+    return streamData;
+  }
+
+  Future<DataModel?> loadDataModel() async {
+    final jsonResponse = await FileManager.instance
+        .readJsonFile(Strings.FOLDER_APP, Strings.DATA_FILE);
+
+    if (jsonResponse != null) {
+      dataModel.setMemoryCache(PlansList.fromJson(jsonResponse));
+      dataModel.setStorage(PlansList.fromJson(jsonResponse));
+      return dataModel;
+    } else {
+      return null;
+    }
+  }
+
+  /// get [dataModel] for the dataModel
+  DataModel get getDataModel => dataModel;
 
   /// write [data] to storage.
   Future<void> writeData() async {
@@ -113,6 +142,13 @@ class DataController with ChangeNotifier {
   /// Delete a plan.
   Future<String> deleteAPlan(Plan plan) async {
     try {
+      //Delete all notifications.
+      for (var task in plan.tasks) {
+        if (task.alert == true) {
+          NotificationsController.cancelScheduledNotificationsById(task.id);
+          NotificationsController.dismissNotificationsById(task.id);
+        }
+      }
       // Delete a plan.
       dataModel.deletePlan(plan);
       // Write to storage.
@@ -172,6 +208,9 @@ class DataController with ChangeNotifier {
   /// Delete a task
   Future<String> deleteATask(Plan plan, Task task) async {
     try {
+      //Delete a notification.
+      NotificationsController.cancelScheduledNotificationsById(task.id);
+      NotificationsController.dismissNotificationsById(task.id);
       // Delete a task.
       dataModel.deleteTask(plan, task);
       // Write to storage.
@@ -256,16 +295,38 @@ class DataController with ChangeNotifier {
           if (task != null) {
             Task _task = task;
             _task.reminder = '(O.O)';
-            _task.complete = false;
+            _task.complete = task.complete;
             _task.alert = false;
             dataModel.updateTask(plan, _task);
-            await writeData().then((value) {
-              if (currentState.mounted) currentState.setState(() {});
-            });
+            await writeData();
           }
         }
       }
     }
+  }
+
+  MaterialPageRoute onAppKilled(BuildContext context, dynamic receivedAction) {
+    var payload = receivedAction.payload;
+    if (payload != null) {
+      var idPlan = payload['plan'];
+      var idTask = payload['task'];
+      if (idPlan != null && idTask != null) {
+        var plan = dataModel.getPlan(int.parse(idPlan));
+        if (plan != null) {
+          var task = dataModel.getTask(plan, int.parse(idTask));
+          if (task != null) {
+            Task _task = task;
+            _task.reminder = '(O.O)';
+            _task.complete = task.complete;
+            _task.alert = false;
+            dataModel.updateTask(plan, _task);
+            writeData();
+            return MaterialPageRoute(builder: (_) => TasksPage(plan: plan));
+          }
+        }
+      }
+    }
+    return MaterialPageRoute(builder: (_) => const PlansPage());
   }
 
   /// Format Iso8601 to String by current location.

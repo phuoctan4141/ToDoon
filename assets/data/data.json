@@ -1,13 +1,13 @@
 [
    {
       "id": 123,
-      "name": "New Plan 1",
+      "name": "Welcome to ToDoon",
       "tasks": [
          {
             "id": 964,
-            "description": "New Task 1",
-            "date": "2023-01-20 20:18:04Z",
-            "reminder": "2023-01-20 22:18:04Z",
+            "description": "Nice To Meet You",
+            "date": "",
+            "reminder": "",
             "complete": false,
             "alert": false
          }
@@ -15,20 +15,20 @@
    },
    {
       "id": 234,
-      "name": "New Plan 2",
+      "name": "Chào mừng đến với ToDoon",
       "tasks": [
          {
             "id": 456,
-            "description": "New Task 1",
-            "date": "2023-01-20 20:18:04Z",
+            "description": "Rất vui được gặp bạn",
+            "date": "",
             "reminder": "",
             "complete": false,
             "alert": false
          },
          {
             "id": 789,
-            "description": "New Task 2",
-            "date": "2023-01-20 21:18:04Z",
+            "description": "Cảm ơn vì đã tải tôi về",
+            "date": "",
             "reminder": "",
             "complete": true,
             "alert": false

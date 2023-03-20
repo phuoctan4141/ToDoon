@@ -130,6 +130,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           width: 378,
           child: AdWidget(
             ad: _bannerAd,
+            key: UniqueKey(),
           ),
         ),
       );

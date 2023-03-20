@@ -5,16 +5,15 @@ import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
-import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/routes/routes.dart';
-import 'package:todoon/src/views/data/tasks/components/alert_detete_task.dart';
 import 'package:todoon/src/views/data/tasks/components/tasks_components.dart';
 import 'package:todoon/src/views/data/tasks/task_edit_page.dart';
 import 'package:todoon/src/views/widgets/back_button_widget.dart';
 import 'package:todoon/src/views/widgets/complete_count_tasks.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
 import 'package:todoon/src/views/widgets/empty_icon_widget.dart';
+import 'package:todoon/src/views/widgets/status_bar_widget.dart';
 import 'package:todoon/src/views/widgets/wrong_widget.dart';
 
 class TasksPage extends StatefulWidget {
@@ -126,20 +125,28 @@ class _TasksPageState extends State<TasksPage> {
         DataController.instance.dataModel.notTasksList(taskList);
     final comTasksList =
         DataController.instance.dataModel.comTasksList(taskList);
-    final deadasksList =
+    final deadTasksList =
         DataController.instance.dataModel.deadTasksList(taskList);
+    final width = MediaQuery.of(context).size.width;
 
     return SingleChildScrollView(
       controller: scrollController,
       child: Column(
         children: <Widget>[
+          // Status bar.
+          StatusBarWidget(
+              width: width - 16,
+              height: 30,
+              deadTasksList: deadTasksList,
+              notTasksList: notTasksList,
+              comTasksList: comTasksList),
           // Deadline tasksList.
           ListView.builder(
             clipBehavior: Clip.antiAlias,
             shrinkWrap: true,
-            itemCount: deadasksList.tasks.length,
+            itemCount: deadTasksList.tasks.length,
             itemBuilder: (context, indexTask) =>
-                _buildTaskTile(context, deadasksList.tasks, indexTask),
+                _buildTaskTile(context, deadTasksList.tasks, indexTask),
           ),
           // Not complete tasks.
           ListView.builder(
@@ -325,98 +332,6 @@ class _TasksPageState extends State<TasksPage> {
         ));
       }
     }
-  }
-//end code
-}
-
-/// Task search delegate.
-class TaskSearchDelegate extends SearchDelegate {
-  final Plan plan;
-  final TasksList taskList;
-
-  TaskSearchDelegate(
-    this.plan,
-    this.taskList,
-  ) : super(
-          searchFieldLabel: Language.instance.Search,
-          keyboardType: TextInputType.text,
-          textInputAction: TextInputAction.search,
-        );
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-          onPressed: () {
-            query = '';
-          },
-          tooltip: Language.instance.Refresh,
-          icon: const Icon(Icons.replay))
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-        onPressed: () {
-          close(context, null);
-        },
-        tooltip: Language.instance.Back,
-        icon: const Icon(Icons.arrow_back));
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    List<Task> matchQuery = [];
-    for (var task in taskList.tasks) {
-      if (task.description.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(task);
-      }
-    }
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        var task = matchQuery[index];
-        return ListTile(
-          leading: CircleAvatar(
-              backgroundColor:
-                  Themes.instance.DrawerItemCompleteContentColor(task.complete),
-              child: Text(plan.name[0])),
-          title: Text(task.description,
-              style: Themes.instance.DrawerItemContentTextStyle(task.complete)),
-          onTap: () => Navigator.pushNamed(context, TaskEditPage.routeName,
-              arguments: TaskPageArguments(plan, task)),
-        );
-      },
-      itemCount: matchQuery.length,
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    List<Task> matchQuery = [];
-
-    for (var task in taskList.tasks) {
-      if (task.description.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(task);
-      }
-    }
-
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        var task = matchQuery[index];
-        return ListTile(
-          leading: CircleAvatar(
-              backgroundColor:
-                  Themes.instance.DrawerItemCompleteContentColor(task.complete),
-              child: Text(plan.name[0])),
-          title: Text(task.description,
-              style: Themes.instance.DrawerItemContentTextStyle(task.complete)),
-          onTap: () => Navigator.pushNamed(context, TaskEditPage.routeName,
-              arguments: TaskPageArguments(plan, task)),
-        );
-      },
-      itemCount: matchQuery.length,
-    );
   }
 //end code
 }

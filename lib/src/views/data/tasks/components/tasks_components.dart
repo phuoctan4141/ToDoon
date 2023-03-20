@@ -7,3 +7,5 @@ export 'package:todoon/src/views/data/tasks/components/alert_edit_task.dart';
 export 'package:todoon/src/views/data/tasks/components/alert_notice_task.dart';
 export 'package:todoon/src/views/data/tasks/components/task_item.dart';
 export 'package:todoon/src/views/data/tasks/components/tasks_drawer.dart';
+export 'package:todoon/src/views/data/tasks/components/alert_detete_task.dart';
+export 'package:todoon/src/views/data/tasks/components/task_search.dart';

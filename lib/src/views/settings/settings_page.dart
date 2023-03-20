@@ -72,6 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
           height: 100,
           child: AdWidget(
             ad: _bannerAd,
+            key: UniqueKey(),
           ),
         ),
       );

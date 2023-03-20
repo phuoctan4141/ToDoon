@@ -6,12 +6,11 @@ import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/constants/strings.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
-import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/routes/routes.dart';
-import 'package:todoon/src/views/data/plans/components/alert_delete_plan.dart';
 import 'package:todoon/src/views/data/plans/components/plans_components.dart';
 import 'package:todoon/src/views/data/tasks/tasks_page.dart';
+import 'package:todoon/src/views/widgets/allow_notices_widget.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
 import 'package:todoon/src/views/widgets/empty_icon_widget.dart';
 import 'package:todoon/src/views/widgets/wrong_widget.dart';
@@ -35,6 +34,7 @@ class _PlansPageState extends State<PlansPage> {
 
     scrollController = ScrollController();
     fetandhandleData(context);
+    AllowNoticesWidget(context);
   }
 
   @override
@@ -264,87 +264,6 @@ class _PlansPageState extends State<PlansPage> {
         );
       }
     }
-  }
-//end code
-}
-
-/// Plan search delegate.
-class PlanSearchDelegate extends SearchDelegate {
-  final PlansList plansList;
-
-  PlanSearchDelegate(this.plansList)
-      : super(
-          searchFieldLabel: Language.instance.Search,
-          keyboardType: TextInputType.text,
-          textInputAction: TextInputAction.search,
-        );
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-          onPressed: () {
-            query = '';
-          },
-          tooltip: Language.instance.Refresh,
-          icon: const Icon(Icons.replay))
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-        onPressed: () {
-          close(context, null);
-        },
-        tooltip: Language.instance.Back,
-        icon: const Icon(Icons.arrow_back));
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    List<Plan> matchQuery = [];
-    for (var plan in plansList.plans) {
-      if (plan.name.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(plan);
-      }
-    }
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        var plan = matchQuery[index];
-        return ListTile(
-          leading: CircleAvatar(child: Text(plan.name[0])),
-          title: Text(plan.name),
-          onTap: () => Navigator.pushNamed(context, TasksPage.routeName,
-              arguments: plan),
-        );
-      },
-      itemCount: matchQuery.length,
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    List<Plan> matchQuery = [];
-
-    for (var plan in plansList.plans) {
-      if (plan.name.toLowerCase().contains(query.toLowerCase())) {
-        matchQuery.add(plan);
-      }
-    }
-
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        var plan = matchQuery[index];
-        return ListTile(
-          leading: CircleAvatar(child: Text(plan.name[0])),
-          title: Text(plan.name),
-          onTap: () => Navigator.pushNamed(context, TasksPage.routeName,
-              arguments: plan),
-        );
-      },
-      itemCount: matchQuery.length,
-    );
   }
 //end code
 }

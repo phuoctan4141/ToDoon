@@ -1,9 +1,9 @@
 {
-    "language": {
-        "code": "en_US",
-        "locate": "en",
-        "name": "English",
-        "country": "United States"
+    "language":     {
+        "code": "vi_VN",
+        "locate": "vi",
+        "name": "Tiếng Việt",
+        "country": "Việt Nam"
     },
     "themeMode": 0,
     "colorMode": 0

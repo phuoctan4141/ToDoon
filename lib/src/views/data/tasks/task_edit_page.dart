@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
+import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/routes/routes.dart';
@@ -60,20 +61,41 @@ class _TaskEditPageState extends State<TaskEditPage> {
     scrollController = ScrollController();
     fieldNode = FocusNode();
 
-    dataController = Provider.of<DataController>(context, listen: false);
-    plan = dataController.dataModel.getPlan(widget.plan.id)!;
-    task = dataController.dataModel.getTask(plan, widget.task.id)!;
-
     textEditingDecription = TextEditingController();
     textEditingDate = TextEditingController();
     textEditingReminder = TextEditingController();
+
+    dataController = Provider.of<DataController>(context, listen: false);
+    plan = dataController.dataModel.getPlan(widget.plan.id)!;
+    task = dataController.dataModel.getTask(plan, widget.task.id)!;
 
     textEditingDecription.text = task.description;
     textEditingDate.text = DataController.instance.Iso8601toString(task.date);
     textEditingReminder.text =
         DataController.instance.Iso8601toString(task.reminder);
-    _complete = task.complete;
-    _alert = task.alert;
+    setState(() {
+      _complete = task.complete;
+      _alert = task.alert;
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final _dataController = Provider.of<DataController>(context, listen: true);
+    plan = _dataController.dataModel.getPlan(widget.plan.id)!;
+    task = _dataController.dataModel.getTask(plan, widget.task.id)!;
+
+    if ((_alert == false) || (task.alert != _alert && _alert == true)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          textEditingReminder.text =
+              DataController.instance.Iso8601toString(task.reminder);
+          _alert = task.alert;
+        });
+      });
+    }
   }
 
   @override
@@ -88,31 +110,27 @@ class _TaskEditPageState extends State<TaskEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DataController>(
-      builder: (context, dataController, child) {
-        return WillPopScope(
-          onWillPop: () => Future.value(true),
-          child: GestureDetector(
-            onTap: () => fieldNode.unfocus(),
-            child: Scaffold(
-              appBar: AppBar(
-                // ignore: prefer_const_constructors
-                leading: BackButtonWidget(),
-                title: Text(plan.name.toString()),
-                // ignore: prefer_const_literals_to_create_immutables
-                actions: [
-                  _EditPlan(context, widget.plan),
-                  // ignore: prefer_const_constructors
-                  SettingsButtonWidget(),
-                ],
-              ),
-              drawer: DrawerWidget(
-                  content: _buildDrawer(context), focusNode: fieldNode),
-              body: SingleChildScrollView(child: _bodyTask(context)),
-            ),
+    return WillPopScope(
+      onWillPop: () => Future.value(true),
+      child: GestureDetector(
+        onTap: () => fieldNode.unfocus(),
+        child: Scaffold(
+          appBar: AppBar(
+            // ignore: prefer_const_constructors
+            leading: BackButtonWidget(),
+            title: Text(plan.name.toString()),
+            // ignore: prefer_const_literals_to_create_immutables
+            actions: [
+              _EditPlan(context, widget.plan),
+              // ignore: prefer_const_constructors
+              SettingsButtonWidget(),
+            ],
           ),
-        );
-      },
+          drawer: DrawerWidget(
+              content: _buildDrawer(context), focusNode: fieldNode),
+          body: SingleChildScrollView(child: _bodyTask(context)),
+        ),
+      ),
     );
   }
 
@@ -130,6 +148,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
           height: 100,
           child: AdWidget(
             ad: _bannerAd,
+            key: UniqueKey(),
           ),
         ),
       );
@@ -168,7 +187,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   _TaskComplete(context),
-                  //_TaskAlert(context),
+                  _TaskAlert(context),
                 ],
               ),
               const SizedBox(height: 8),
@@ -237,11 +256,15 @@ class _TaskEditPageState extends State<TaskEditPage> {
         controller: textEditingReminder,
         keyboardType: TextInputType.datetime,
         child: IconButton(
-          onPressed: () => changeReminder(context),
+          onPressed: () async {
+            changeReminder(context);
+          },
           icon: const Icon(Icons.alarm),
         ),
       ),
-      onTap: () => changeReminder(context),
+      onTap: () async {
+        changeReminder(context);
+      },
     );
   }
 
@@ -285,9 +308,10 @@ class _TaskEditPageState extends State<TaskEditPage> {
       minLines: 1,
       maxLines: 1,
       readOnly: true,
+      controller: textEditingReminder,
       child: IconButton(
         icon: const Icon(Icons.alarm),
-        onPressed: () {},
+        onPressed: () => changeReminderAlert(context),
       ),
     );
   }
@@ -359,11 +383,40 @@ class _TaskEditPageState extends State<TaskEditPage> {
       maxTime: DateTime(2050, 12, 31),
       locale: Language.instance.getLocaleType,
       theme: Themes.instance.DatetimePickerTheme,
-      onConfirm: (dateTime) {
+      onConfirm: (dateTime) async {
         if (dateTime.isAfter(currentTime)) {
           initializeDateFormatting(Language.instance.current.code, null);
           textEditingReminder.text =
               DataController.instance.DateTimetoString(dateTime);
+          _dateTime = dateTime;
+          NotificationsController.cancelScheduledNotificationsById(task.id);
+          final done = await updateAlert(context);
+          if (context.mounted && done.compareTo(States.TRUE) == 0) {
+            // update _alert is false.
+            setState(() {
+              _alert = false;
+            });
+          }
+        }
+      },
+    );
+  }
+
+  void changeReminderAlert(BuildContext context) {
+    final currentTime = DateTime.now();
+    DatePicker.showDateTimePicker(
+      context,
+      showTitleActions: true,
+      minTime: currentTime.add(const Duration(minutes: 1)),
+      maxTime: DateTime(2050, 12, 31),
+      locale: Language.instance.getLocaleType,
+      theme: Themes.instance.DatetimePickerTheme,
+      onConfirm: (dateTime) async {
+        if (dateTime.isAfter(currentTime)) {
+          initializeDateFormatting(Language.instance.current.code, null);
+          textEditingReminder.text =
+              DataController.instance.DateTimetoString(dateTime);
+          _dateTime = dateTime;
         }
       },
     );
@@ -462,51 +515,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
                 content: Container(
                   child: _TaskReminderAlert(context),
                 ),
-                onNotice: () async {
-                  if (_dateTime != null) {
-                    final _description = textEditingDecription.text;
-                    final _date =
-                        dataController.StringtoIso8601(textEditingDate.text);
-                    final _reminder = dataController.StringtoIso8601(
-                        textEditingReminder.text);
-
-                    final _task = Task(
-                        id: task.id,
-                        description: _description,
-                        date: _date,
-                        reminder: _reminder,
-                        complete: _complete,
-                        alert: _alert);
-                    final done = await dataController.editATask(plan, _task);
-
-                    if (context.mounted && done.compareTo(States.TRUE) == 0) {
-                      // Create a notification.
-
-                      Navigator.of(context).pop();
-                      // Show snackbar.
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(
-                          '${Language.instance.Alert} ${Language.instance.Task}',
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        margin: const EdgeInsets.all(10),
-                        duration: const Duration(seconds: 1),
-                      ));
-                    }
-                  } else {
-                    // Show snackbar.
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                        Language.instance.Wrong,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(10),
-                      duration: const Duration(seconds: 1),
-                    ));
-                  }
-                },
+                onNotice: () async => onNotice(context),
                 onCancel: () {
                   Navigator.of(context).pop(false);
                   setState(() {
@@ -515,10 +524,74 @@ class _TaskEditPageState extends State<TaskEditPage> {
                 });
           });
     } else {
+      //Cancel a notification.
+      NotificationsController.cancelScheduledNotificationsById(task.id);
+      //Update a task.
+      final done = await updateAlert(context);
+      if (context.mounted && done.compareTo(States.TRUE) == 0) {
+        // update _alert is false.
+        setState(() {
+          _alert = false;
+        });
+        // Show snackbar.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            '${Language.instance.Alert} ${Language.instance.Cancel}',
+            overflow: TextOverflow.ellipsis,
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 1),
+        ));
+      }
+    }
+  }
+
+  Future<void> onNotice(BuildContext context) async {
+    if (_dateTime != null) {
+      final _description = textEditingDecription.text;
+      final _date = dataController.StringtoIso8601(textEditingDate.text);
+      final _reminder =
+          dataController.StringtoIso8601(textEditingReminder.text);
+
+      final _task = Task(
+          id: task.id,
+          description: _description,
+          date: _date,
+          reminder: _reminder,
+          complete: _complete,
+          alert: true);
+      final done = await dataController.editATask(plan, _task);
+
+      if (context.mounted && done.compareTo(States.TRUE) == 0) {
+        // Create a notification.
+        NotificationsController.createTaskReminderNotification(
+            plan, task, _dateTime!);
+        // Set _alert is true.
+        Navigator.of(context).pop();
+        setState(() {
+          _alert = true;
+        });
+        // Show snackbar.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+            '${Language.instance.Alert} ${Language.instance.Task}',
+            overflow: TextOverflow.ellipsis,
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(10),
+          duration: const Duration(seconds: 1),
+        ));
+      }
+    } else {
+      // Set _alert is false.
+      setState(() {
+        _alert = false;
+      });
       // Show snackbar.
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-          '${Language.instance.Alert} ${Language.instance.Cancel}',
+          Language.instance.Wrong,
           overflow: TextOverflow.ellipsis,
         ),
         behavior: SnackBarBehavior.floating,
@@ -526,6 +599,22 @@ class _TaskEditPageState extends State<TaskEditPage> {
         duration: const Duration(seconds: 1),
       ));
     }
+  }
+
+  Future<String> updateAlert(BuildContext context) async {
+    //Update a task.
+    final _description = textEditingDecription.text;
+    final _date = dataController.StringtoIso8601(textEditingDate.text);
+    final _reminder = dataController.StringtoIso8601(textEditingReminder.text);
+
+    final _task = Task(
+        id: task.id,
+        description: _description,
+        date: _date,
+        reminder: _reminder,
+        complete: _complete,
+        alert: false);
+    return await dataController.editATask(plan, _task);
   }
 //end code
 }
