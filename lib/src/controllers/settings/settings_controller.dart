@@ -32,7 +32,7 @@ class SettingsController with SettingData, ChangeNotifier {
     String state = States.FALSE;
 
     state = await FileManager.instance
-        .createJsonFile(Strings.FOLDER_APP, Strings.SETTINGS_FILE);
+        .createJsonFile(States.FOLDER_APP, States.SETTINGS_FILE);
 
     if (state.compareTo(States.CREATED_FILE) == 0) {
       final jsonContent =
@@ -40,8 +40,8 @@ class SettingsController with SettingData, ChangeNotifier {
 
       final jsonResponse = json.decode(jsonContent);
 
-      await FileManager.instance.writeJsonFile(
-          Strings.FOLDER_APP, Strings.SETTINGS_FILE, jsonResponse);
+      await FileManager.instance
+          .writeJsonFile(States.FOLDER_APP, States.SETTINGS_FILE, jsonResponse);
     }
 
     notifyListeners();
@@ -50,7 +50,7 @@ class SettingsController with SettingData, ChangeNotifier {
   /// Load settings file & notifies the listeners.
   Future<void> loadSetting() async {
     final jsonResponse = await FileManager.instance
-        .readJsonFile(Strings.FOLDER_APP, Strings.SETTINGS_FILE);
+        .readJsonFile(States.FOLDER_APP, States.SETTINGS_FILE);
 
     if (jsonResponse != null) {
       languageData = LanguageData.fromJson(jsonResponse['language']);
@@ -63,14 +63,20 @@ class SettingsController with SettingData, ChangeNotifier {
 
   /// Save [current] settings to storage & notifies the listeners.
   Future<void> saveSetting() async {
-    final jsonResponse = jsonDecode(
-        '''{"language":${jsonEncode(languageData)},"themeMode": ${themeMode.index},"colorMode": ${colorMode.index}}''');
+    final jsonResponse = jsonDecode(settingJson);
 
     FileManager.instance
-        .writeJsonFile(Strings.FOLDER_APP, Strings.SETTINGS_FILE, jsonResponse);
+        .writeJsonFile(States.FOLDER_APP, States.SETTINGS_FILE, jsonResponse);
 
     notifyListeners();
   }
+
+  /// Setting json string.
+  String get settingJson => '{'
+      '"language":${jsonEncode(languageData)},'
+      '"themeMode": ${themeMode.index},'
+      '"colorMode": ${colorMode.index}'
+      '}';
 
   @override
   // ignore: must_call_super

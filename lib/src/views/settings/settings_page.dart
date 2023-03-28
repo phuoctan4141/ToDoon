@@ -23,8 +23,10 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   late Set<LanguageData> available = <LanguageData>{};
-  final List<ThemeMode> themeList = ThemeMode.values;
-  final List<ColorMode> colorList = ColorMode.values;
+  late List<ThemeMode> themeList = ThemeMode.values;
+  late List<ColorMode> colorList = ColorMode.values;
+
+  late SettingsController settingsController;
 
   @override
   void initState() {
@@ -36,14 +38,22 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   @override
+  void dispose() {
+    settingsController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<SettingsController>(
       builder: (context, settingsController, child) {
+        this.settingsController = settingsController;
         return Scaffold(
           appBar: AppBar(
             // ignore: prefer_const_constructors
             leading: BackButtonWidget(),
-            title: Text(Language.instance.Settings_Title),
+            title: Text(Language.instance.Settings_Title,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
           body: ListView(
             clipBehavior: Clip.antiAlias,
@@ -51,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
               _buildThemesSection(context),
               _buildLanguagesSection(context),
               _buildColorsSection(context),
-              _adsContainer(context),
+              //_adsContainer(context),
             ],
           ),
         );
@@ -66,12 +76,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _adsContainer(BuildContext context) {
     if (Platform.isAndroid) {
-      final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
+      final _bannerAd = AdsHelper.instance.getBannerAd?..load();
       return Card(
         child: SizedBox(
           height: 100,
           child: AdWidget(
-            ad: _bannerAd,
+            ad: _bannerAd!,
             key: UniqueKey(),
           ),
         ),
@@ -84,8 +94,6 @@ class _SettingsPageState extends State<SettingsPage> {
   // create all of the theme mode sections.
   Widget _buildThemesSection(BuildContext context) {
     // Currently, Theme Mode.
-    final settingsController =
-        Provider.of<SettingsController>(context, listen: false);
     late ThemeMode current = settingsController.themeMode;
     late ColorMode color = settingsController.colorMode;
 
@@ -129,8 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
   // create all of the color mode sections.
   Widget _buildColorsSection(BuildContext context) {
     // Currently, Color Mode.
-    final settingsController =
-        Provider.of<SettingsController>(context, listen: false);
     late ThemeMode current = settingsController.themeMode;
     late ColorMode color = settingsController.colorMode;
 
@@ -171,7 +177,6 @@ class _SettingsPageState extends State<SettingsPage> {
   // Create all of the language sections.
   _buildLanguagesSection(BuildContext context) {
     // Currently, Language.
-    final settingsController = context.read<SettingsController>();
     late LanguageData current = context.watch<Language>().current;
 
     return SettingsSection(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
-import 'package:todoon/src/views/data/tasks/tasks_page.dart';
+import 'package:todoon/src/views/data/tasks/pages/tasks_page.dart';
 
 /// Plan search delegate.
 class PlanSearchDelegate extends SearchDelegate {

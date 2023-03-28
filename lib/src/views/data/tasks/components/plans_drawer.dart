@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
-import 'package:todoon/src/views/data/tasks/tasks_page.dart';
+import 'package:todoon/src/views/data/tasks/pages/tasks_page.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 
 class PlansDrawer extends StatelessWidget {

@@ -10,6 +10,8 @@ enum onFunc { Edit, Delete }
 class MenuTask extends StatelessWidget {
   Widget? icon;
   bool complete;
+  bool alert;
+  VoidCallback onAlert;
   VoidCallback onEdit;
   VoidCallback onDelete;
 
@@ -17,12 +19,45 @@ class MenuTask extends StatelessWidget {
     Key? key,
     this.icon,
     required this.complete,
+    required this.alert,
+    required this.onAlert,
     required this.onEdit,
     required this.onDelete,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 4.0,
+      runSpacing: 2.0,
+      alignment: WrapAlignment.center,
+      runAlignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.end,
+      children: [
+        _buildInkAlert(context),
+        _buildPopupMenuButton(context),
+      ],
+    );
+  }
+
+  _buildInkAlert(BuildContext context) {
+    return Ink(
+      decoration: ShapeDecoration(
+        color: Themes.instance.AlertCompleteBolderColor(alert),
+        shape: RoundedRectangleBorder(
+            borderRadius: Themes.instance.switchRollBorder),
+      ),
+      child: IconButton(
+          onPressed: onAlert,
+          tooltip: Language.instance.Reminder,
+          color: Themes.instance.AlertCompleteColor(alert),
+          icon: alert
+              ? const Icon(Icons.alarm_on_sharp)
+              : const Icon(Icons.alarm_off_sharp)),
+    );
+  }
+
+  _buildPopupMenuButton(BuildContext context) {
     return PopupMenuButton(
       icon: icon ??
           Icon(Icons.more_vert,

@@ -1,10 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/views/widgets/complete_count_tasks.dart';
+import 'package:todoon/src/views/widgets/status_pie_widget.dart';
 
 class PlanTitle extends StatelessWidget {
   Plan plan;
@@ -36,7 +39,7 @@ class PlanTitle extends StatelessWidget {
         onDismissed: onDismissed,
         child: Card(
           child: ListTile(
-            leading: CircleAvatar(child: Text(plan.name[0])),
+            leading: _buildCircleStatus(context),
             title: Text(
               plan.name,
               maxLines: 1,
@@ -48,6 +51,26 @@ class PlanTitle extends StatelessWidget {
             trailing: trailing,
           ),
         ));
+  }
+
+  _buildCircleStatus(BuildContext context) {
+    final datacontroller = context.watch<DataController>();
+    final tasksList = datacontroller.getTasksList(plan);
+    double deadLenght =
+        datacontroller.getDeadlineTasksList(tasksList).tasks.length.toDouble();
+    double notLenght = datacontroller
+        .getNotCompleteTasksList(tasksList)
+        .tasks
+        .length
+        .toDouble();
+    double comLenght =
+        datacontroller.getCompleteTasksList(tasksList).tasks.length.toDouble();
+
+    return StatusPieWidget(
+        deadLenght: deadLenght,
+        notLenght: notLenght,
+        comLenght: comLenght,
+        centerText: plan.name[0]);
   }
 
   Widget _backgroundDismissible(BuildContext context) {

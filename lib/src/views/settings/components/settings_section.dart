@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 
 class SettingsSection extends StatelessWidget {
   String title = '';
-  TextStyle? titleStyle;
+  TextStyle titleStyle;
   List<Widget> children;
 
   SettingsSection({
     Key? key,
     required this.title,
-    this.titleStyle,
+    this.titleStyle = const TextStyle(fontWeight: FontWeight.bold),
     required this.children,
   }) : super(key: key);
 

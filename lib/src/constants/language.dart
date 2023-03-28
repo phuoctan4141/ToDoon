@@ -1,4 +1,7 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -137,6 +140,7 @@ class Language extends Strings with ChangeNotifier {
     Task_Dismissed = map['Task_Dismissed']!;
     Tasks = map['Tasks']!;
     Wrong = map['Wrong']!;
+    Focus_Content = map['Focus_Content']!;
 
     current = value;
     notifyListeners();
@@ -145,6 +149,28 @@ class Language extends Strings with ChangeNotifier {
   LocaleType get getLocaleType {
     return LocaleType.values
         .firstWhere((element) => element.name == current.locate);
+  }
+
+  Map<String, String> get getNoticeLabel {
+    late Locale _deviceLocale = window.locale;
+    late String _completeLabel = Language.instance.Complete;
+    late String _cancelLabel = Language.instance.Cancel;
+    // Set label for the _deviceLocale language.
+    if (_deviceLocale.languageCode != Language.instance.current.locate) {
+      if (_deviceLocale.languageCode == 'vi') {
+        _completeLabel = 'Hoàn thành';
+        _cancelLabel = 'Hủy';
+      } else {
+        _completeLabel = 'Complete';
+        _cancelLabel = 'Cancel';
+      }
+    }
+    final Map<String, String> map = {
+      'COMPLETE': _completeLabel,
+      'CANCEL': _cancelLabel
+    };
+
+    return map;
   }
 
   /// Currently selected & displayed [Language].

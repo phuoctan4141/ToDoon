@@ -1,17 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, prefer_const_constructors, no_leading_underscores_for_local_identifiers
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/strings.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
-import 'package:todoon/src/utils/ads_helper.dart';
-import 'package:todoon/src/views/data/plans/plans_page.dart';
-import 'package:todoon/src/views/settings/settings_page.dart';
+import 'package:todoon/src/routes/routes_export.dart';
 
 class DrawerWidget extends StatefulWidget {
   bool notHome;
@@ -122,17 +117,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   }
 
   Widget _adsContainer(BuildContext context) {
-    if (Platform.isAndroid) {
-      final _bannerAd = AdsHelper.instance.getBannerAd()!..load();
+    if (1 == 2) {
       return Card(
-        child: SizedBox(
-          height: 100,
-          width: 378,
-          child: AdWidget(
-            ad: _bannerAd,
-            key: UniqueKey(),
-          ),
-        ),
+        child: SizedBox(height: 100, width: 378, child: Container()),
       );
     } else {
       return Container();

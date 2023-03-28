@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:todoon/src/constants/azure.dart';
-import 'package:todoon/src/constants/bleed.dart';
+import 'package:todoon/src/constants/themes/themes_export.dart';
 
 enum ColorMode { azure, bleed }
 
 /// Provides the [Theme] shown inside the UI.
-class Themes extends AzureVisual with ChangeNotifier {
+class Themes with ChangeNotifier {
   /// [Theme] object singleton instance.
   static final Themes instance = Themes();
 
@@ -36,13 +35,13 @@ class Themes extends AzureVisual with ChangeNotifier {
     // Set currently [ThemeMode]
     current = themeMode;
     color = colorMode;
-    await update();
+    await updateTheme();
     await updateColor();
     notifyListeners();
   }
 
   /// check and update isLightMode.
-  Future<void> update() async {
+  Future<void> updateTheme() async {
     if (current == ThemeMode.light) {
       isLightMode = true;
     } else if (current == ThemeMode.dark) {
@@ -64,30 +63,30 @@ class Themes extends AzureVisual with ChangeNotifier {
       /// Light Theme.
       lightTheme = ThemeData(
         useMaterial3: false,
-        colorScheme: AzureVisual.lightColorScheme,
-        checkboxTheme: AzureVisual.checkboxThemeData,
+        colorScheme: AzureTheme.lightColorScheme,
+        checkboxTheme: AzureTheme.checkboxThemeData,
       );
 
       /// Dark Theme.
       darkTheme = ThemeData(
         useMaterial3: false,
-        colorScheme: AzureVisual.darkColorScheme,
-        checkboxTheme: AzureVisual.checkboxThemeData,
+        colorScheme: AzureTheme.darkColorScheme,
+        checkboxTheme: AzureTheme.checkboxThemeData,
       );
     } else {
       if (color.index == 1) {
         /// Light Theme.
         lightTheme = ThemeData(
           useMaterial3: true,
-          colorScheme: BleedVisual.lightColorScheme,
-          checkboxTheme: BleedVisual.checkboxThemeData,
+          colorScheme: BleedTheme.lightColorScheme,
+          checkboxTheme: BleedTheme.checkboxThemeData,
         );
 
         /// Dark Theme.
         darkTheme = ThemeData(
           useMaterial3: true,
-          colorScheme: BleedVisual.darkColorScheme,
-          checkboxTheme: BleedVisual.checkboxThemeData,
+          colorScheme: BleedTheme.darkColorScheme,
+          checkboxTheme: BleedTheme.checkboxThemeData,
         );
       }
     }
@@ -257,21 +256,21 @@ class Themes extends AzureVisual with ChangeNotifier {
         : darkTheme.colorScheme.onSurfaceVariant;
   }
 
-  get switchRollBorder {
+  dynamic get switchRollBorder {
     if (color.index == 0) {
-      return AzureVisual.swtichRollBorder;
+      return AzureTheme.switchRollBorder;
     } else if (color.index == 1) {
-      return BleedVisual.swtichRollBorder;
+      return BleedTheme.switchRollBorder;
     }
   }
   //Switch Widget Visuals
 
   // Drawer Visuals
-  get DrawerTitleContentTextStyle {
+  TextStyle get DrawerTitleContentTextStyle {
     return TextStyle(fontWeight: FontWeight.bold, color: RadioSelectedColor);
   }
 
-  get DrawerIconColor {
+  Color get DrawerIconColor {
     return isLightMode
         ? lightTheme.colorScheme.onSurfaceVariant
         : darkTheme.colorScheme.onSurface;
@@ -302,6 +301,32 @@ class Themes extends AzureVisual with ChangeNotifier {
     return const Color(0xFFFFFFFF);
   }
   // PopMenu Visuals
+
+  // Alert Dialog Visuals
+  Color AlertCompleteBolderColor(bool isAlert) {
+    if (isLightMode) {
+      return isAlert
+          ? lightTheme.colorScheme.secondaryContainer
+          : lightTheme.colorScheme.primaryContainer;
+    } else {
+      return isAlert
+          ? darkTheme.colorScheme.secondaryContainer
+          : darkTheme.colorScheme.primaryContainer;
+    }
+  }
+
+  Color AlertCompleteColor(bool isAlert) {
+    if (isLightMode) {
+      return isAlert
+          ? lightTheme.colorScheme.onSecondaryContainer
+          : lightTheme.colorScheme.onPrimaryContainer;
+    } else {
+      return isAlert
+          ? darkTheme.colorScheme.onSecondaryContainer
+          : darkTheme.colorScheme.onPrimaryContainer;
+    }
+  }
+  // Alert Dialog Visuals
 
   @override
   // ignore: must_call_super

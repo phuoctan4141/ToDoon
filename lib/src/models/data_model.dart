@@ -59,7 +59,7 @@ class DataModel implements PlanModel, TasksModel {
       }
       return element.complete == false;
     }).toList();
-    final _tasksList = TasksList(tasks: notTasks);
+    final _tasksList = TasksList(tasks: List.unmodifiable(notTasks));
 
     return _tasksList;
   }
@@ -68,7 +68,7 @@ class DataModel implements PlanModel, TasksModel {
   TasksList comTasksList(TasksList taskList) {
     final comTasks =
         taskList.tasks.where((element) => element.complete == true).toList();
-    final _tasksList = TasksList(tasks: comTasks);
+    final _tasksList = TasksList(tasks: List.unmodifiable(comTasks));
 
     return _tasksList;
   }
@@ -80,9 +80,46 @@ class DataModel implements PlanModel, TasksModel {
       final due = DataController.instance.Iso8601toDateTime(element.date);
       return due?.isBefore(now) == true && element.complete == false;
     }).toList();
-    final _tasksList = TasksList(tasks: comTasks);
+    final _tasksList = TasksList(tasks: List.unmodifiable(comTasks));
 
     return _tasksList;
+  }
+
+  /// PLansList Today.
+  PlansList get plansListToday {
+    final plansToday = getPlansList.plans.where((element) {
+      final tasksList = tasksListToday(element.tasks);
+      if (tasksList.tasks.isNotEmpty) return true;
+      return false;
+    }).toList();
+
+    final _plansList = PlansList(plans: List.unmodifiable(plansToday));
+
+    return _plansList;
+  }
+
+  /// TasksList Today
+  TasksList tasksListToday(List<Task> tasks) {
+    final tasksList = TasksList(tasks: getTasksToday(tasks) ?? []);
+    return tasksList;
+  }
+
+  /// tasks Today.
+  List<Task>? getTasksToday(List<Task> tasks) {
+    final tasksToday = tasks.where((element) {
+      final now = DateTime.now();
+      final due = DataController.instance.Iso8601toDateTime(element.date);
+      if (due != null &&
+          now.year == due.year &&
+          now.month == due.month &&
+          now.day == due.day &&
+          element.complete == false) {
+        return true;
+      }
+      return false;
+    }).toList();
+
+    return tasksToday;
   }
 
   //////////////////////////////
@@ -103,7 +140,7 @@ class DataModel implements PlanModel, TasksModel {
 
   /// Get all plan from _inMemoryCache.
   @override
-  List<Plan> get getAllPlan {
+  List<Plan> get getAllPlans {
     return List.unmodifiable(_inMemoryCache.plans);
   }
 
@@ -199,6 +236,15 @@ class DataModel implements PlanModel, TasksModel {
     return tasks.firstWhereOrNull((element) => element.id == id);
   }
 
+  @override
+  Task? getLastTask(Plan plan) {
+    final _indexPLan = indexPlan(plan);
+    if (_indexPLan == -1) return null;
+    final tasks = List.unmodifiable(plan.tasks);
+
+    return tasks.last;
+  }
+
   /// Add a task to the plan.
   @override
   void addTask(Plan plan, Task task) {
@@ -270,12 +316,17 @@ class DataModel implements PlanModel, TasksModel {
 
     return text;
   }
+
+  void dispose() {
+    _storage.plans.clear();
+    _inMemoryCache.plans.clear();
+  }
 }
 
 /// Plan handle.
 abstract class PlanModel {
   void createPlan({required String name});
-  List<Plan> get getAllPlan;
+  List<Plan> get getAllPlans;
   Plan? getPlan(int id);
   void addPlan(Plan plan);
   void updatePlan(Plan plan);
@@ -293,6 +344,7 @@ abstract class TasksModel {
       bool alert = false});
   List<Task>? getAllTask(Plan plan);
   Task? getTask(Plan plan, int id);
+  Task? getLastTask(Plan plan);
   void addTask(Plan plan, Task task);
   int updateTask(Plan plan, Task task);
   void deleteTask(Plan plan, Task task);

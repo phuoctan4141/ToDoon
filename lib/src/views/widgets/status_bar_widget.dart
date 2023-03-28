@@ -49,9 +49,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
   late double notLength = 0;
   late double comLength = 0;
 
-  @override
-  void initState() {
-    super.initState();
+  void initAnimation() {
     // Com.
     _animationController = AnimationController(
       vsync: this,
@@ -59,22 +57,24 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
     );
     _curvedAnimation =
         CurvedAnimation(parent: _animationController, curve: widget.curve);
-    _tweenAnimation = Tween(begin: 8.0, end: 10.0).animate(_curvedAnimation);
+    _tweenAnimation = Tween(begin: 7.0, end: 10.0).animate(_curvedAnimation);
     // Not.
     _animationNot = AnimationController(
       vsync: this,
       duration: widget.duration,
     );
     _curvedNot = CurvedAnimation(parent: _animationNot, curve: widget.curve);
-    _tweenNot = Tween(begin: 8.0, end: 10.0).animate(_curvedNot);
+    _tweenNot = Tween(begin: 7.0, end: 10.0).animate(_curvedNot);
     //Dead
     _animationDead = AnimationController(
       vsync: this,
       duration: widget.duration,
     );
     _curvedDead = CurvedAnimation(parent: _animationDead, curve: widget.curve);
-    _tweenDead = Tween(begin: 8.0, end: 10.0).animate(_curvedDead);
+    _tweenDead = Tween(begin: 7.0, end: 10.0).animate(_curvedDead);
+  }
 
+  void initData() {
     setState(() {
       quantity = (widget.deadTasksList.tasks.length +
           widget.notTasksList.tasks.length +
@@ -89,6 +89,14 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
       comLength =
           ((widget.comTasksList.tasks.length / quantity) * widget.width);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    initAnimation();
+    initData();
 
     _animationController.forward();
     _animationNot.forward();
@@ -109,24 +117,13 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
     if (widget.comTasksList.tasks.isNotEmpty) {
       if (widget.notTasksList.tasks.isNotEmpty) {
         _animationController.reset();
+        _animationController.forward();
       }
-      _animationController.forward();
     } else if (widget.comTasksList.tasks.isEmpty) {
       _animationController.reverse();
     }
 
-    setState(() {
-      quantity = (widget.deadTasksList.tasks.length +
-          widget.notTasksList.tasks.length +
-          widget.comTasksList.tasks.length);
-      /////////////////
-      deadLength =
-          ((widget.deadTasksList.tasks.length / quantity) * widget.width);
-      notLength =
-          ((widget.notTasksList.tasks.length / quantity) * widget.width);
-      comLength =
-          ((widget.comTasksList.tasks.length / quantity) * widget.width);
-    });
+    initData();
   }
 
   @override

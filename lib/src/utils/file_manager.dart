@@ -29,7 +29,7 @@ class FileManager {
 
       /// if exist return else create
       if (file.existsSync()) {
-        return States.isEXIST;
+        return States.isEXISTS;
       } else {
         file.createSync(recursive: true);
         return States.CREATED_FILE;
@@ -80,7 +80,7 @@ class Json {
     }
   }
 
-  static dynamic tryDecode(data) {
+  static dynamic tryDecode(String data) {
     try {
       return jsonDecode(data);
     } catch (e) {

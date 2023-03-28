@@ -2,9 +2,6 @@
 
 class Strings {
   static const String NAME_APP = 'ToDoon';
-  static const String FOLDER_APP = 'todoon';
-  static const String DATA_FILE = 'data.json';
-  static const String SETTINGS_FILE = 'settings.json';
   late String Add;
   late String Add_Plan;
   late String Add_Task;
@@ -61,4 +58,5 @@ class Strings {
   late String Task_Dismissed;
   late String Tasks;
   late String Wrong;
+  late String Focus_Content;
 }
