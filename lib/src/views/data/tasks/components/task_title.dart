@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
@@ -106,7 +107,7 @@ class TaskTitle extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Icon(Icons.delete_sweep,
+            Icon(ToDoonIcons.delete_sweep,
                 color: Themes.instance.DismissibleBackgroundItemColor),
             Text(Language.instance.Dismiss_Task,
                 style: TextStyle(
@@ -133,7 +134,7 @@ class TaskTitle extends StatelessWidget {
           child: ElevatedButton.icon(
               style: Themes.instance.DismissButtonStyle,
               onPressed: () => Navigator.of(context).pop(true),
-              icon: const Icon(Icons.delete),
+              icon: const Icon(ToDoonIcons.delete),
               label: Text(Language.instance.Dismiss_Task)),
         ),
         ConstrainedBox(
@@ -142,7 +143,7 @@ class TaskTitle extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: () => Navigator.of(context).pop(false),
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(ToDoonIcons.cancel),
             label: Text(Language.instance.Cancel),
           ),
         ),

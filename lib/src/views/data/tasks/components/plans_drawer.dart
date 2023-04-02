@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/views/data/tasks/pages/tasks_page.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
@@ -27,8 +28,8 @@ class PlansDrawer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: Icon(Icons.assignment_outlined,
-              color: Themes.instance.RadioSelectedColor),
+          leading:
+              Icon(ToDoonIcons.plan, color: Themes.instance.RadioSelectedColor),
           title: Text(Language.instance.Plans,
               // ignore: prefer_const_constructors
               style: Themes.instance.DrawerTitleContentTextStyle),

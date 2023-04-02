@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 class EmptyIconWidget extends StatelessWidget {
@@ -7,7 +8,7 @@ class EmptyIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ImageIcon(
-      const AssetImage("assets/icons/todoon_border_256.ico"),
+      const AssetImage(ToDoonIcons.todoon_outline_assets),
       size: 128,
       color: Themes.instance.isLightMode
           ? Themes.instance.lightTheme.colorScheme.onBackground

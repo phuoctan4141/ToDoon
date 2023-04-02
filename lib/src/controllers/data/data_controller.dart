@@ -1,4 +1,4 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
+// ignore_for_file: no_leading_underscores_for_local_identifiers, non_constant_identifier_names
 
 import 'dart:async';
 import 'dart:convert';
@@ -19,22 +19,31 @@ import 'package:todoon/src/utils/file_manager.dart';
 import 'package:todoon/src/views/data/plans/pages/plans_page.dart';
 import 'package:todoon/src/views/data/tasks/pages/tasks_page.dart';
 
-/// Control Data application.
-class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
+/// Data Controller for the application.
+class DataController
+    with ChangeNotifier
+    implements DataHandle, NoticeHandle, DateTimeHandle {
   /// [Data] object singleton instance.
   static DataController instance = DataController();
 
-  /// Data Handle Model.
+  /// Data Handle Model object.
   static final DataModel dataModel = DataModel();
+
+  /// isFirstTime.
+  static bool isFirstTime = false;
 
   /// Initial [data] for the application.
   static Future<void> initialize() async {
-    await instance.fetandcreateJsonFile();
+    String state = await instance.fetandcreateJsonFile;
+    if (state.compareTo(States.CREATED_FILE) == 0) {
+      isFirstTime = true;
+    }
   }
 
-  /// fet & create [data.json] file.
+  /// Fet & Create [data.json] file from the storage.
   /// @return [String] state.
-  Future<String> fetandcreateJsonFile() async {
+  @override
+  Future<String> get fetandcreateJsonFile async {
     String state = States.FALSE;
 
     state = await FileManager.instance
@@ -47,7 +56,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
       dataModel.setMemoryCache(PlansList.fromJson(jsonResponse));
       dataModel.setStorage(PlansList.fromJson(jsonResponse));
 
-      state = await FileManager.instance.writeJsonFile(
+      await FileManager.instance.writeJsonFile(
           States.FOLDER_APP, States.DATA_FILE, dataModel.getDataStorage);
     }
 
@@ -55,8 +64,9 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     return state;
   }
 
-  /// Load [data] to the dataModel.
+  /// Load [data] to the dataModel from the storage.
   /// @return [String] state.
+  @override
   Future<String> get loadData async {
     final jsonResponse = await FileManager.instance
         .readJsonFile(States.FOLDER_APP, States.DATA_FILE);
@@ -71,7 +81,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Write [data] to storage.
+  /// Write [data] to storage from the dataModel.
   Future<void> get writeData async {
     await FileManager.instance.writeJsonFile(
         States.FOLDER_APP, States.DATA_FILE, dataModel.getDataStorage);
@@ -127,7 +137,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
   /// @return [Task] object.
   Task? getLastTask(Plan plan) => dataModel.getLastTask(plan);
 
-  /// Add new plan.
+  /// This method adds a new task.
   /// @return [String] state.
   @override
   Future<String> doAddNewPlan(String name) async {
@@ -147,7 +157,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Edit a plan.
+  /// This method edits a plan.
   /// @return [String] state.
   @override
   Future<String> doEditPlan(Plan plan, String name) async {
@@ -168,7 +178,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Delete a plan.
+  /// This method deletes a plan.
   /// @return [String] state.
   @override
   Future<String> doDeletePlan(Plan plan) async {
@@ -191,7 +201,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Add new task.
+  /// This method adds a new task and a due date notification.
   /// @return [String] state.
   @override
   Future<String> doAddNewTask(Plan plan,
@@ -201,12 +211,23 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
       bool complete = false,
       bool alert = false}) async {
     try {
+      // Ensure that the task has a description.
       if (description.isEmpty) {
         return States.FALSE;
       } else {
         // Create a new task.
         dataModel.createTask(plan,
             description: description, date: date, reminder: reminder);
+        // Create a due date for the notification.
+        var _task = getLastTask(plan);
+        if (_task != null) {
+          var date = Iso8601toDateTime(_task.date);
+          if (date != null && date.isAfter(DateTime.now())) {
+            NotificationsController.createTaskDeadlineNotification(
+                plan, _task, date);
+          }
+        }
+
         // Write to storage.
         await writeData;
 
@@ -217,7 +238,7 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Edit a task.
+  /// This method edits a task.
   /// @return [String] state.
   @override
   Future<String> doEditTask(Plan plan, Task task) async {
@@ -240,16 +261,18 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Delete a task.
+  /// This method deletes a task and a notification of the task.
   /// @return [String] state.
   @override
   Future<String> doDeleteTask(Plan plan, Task task) async {
     try {
-      //Delete a notification.
+      // Delete a notification.
       NotificationsController.cancelScheduledNotificationsById(task.id);
       NotificationsController.dismissNotificationsById(task.id);
+
       // Delete a task.
       dataModel.deleteTask(plan, task);
+
       // Write to storage.
       await writeData;
 
@@ -259,39 +282,43 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  ///Handle notice of a task.
+  /// Handle the notification.
+  /// @route [TasksPage].
   @override
   Future<void> onComplete(ReceivedAction receivedAction) async {
     var payload = receivedAction.payload;
     if (payload != null) {
-      var idPlan = payload['plan'];
-      var idTask = payload['task'];
-      if (idPlan != null && idTask != null) {
-        var plan = dataModel.getPlan(int.parse(idPlan));
-        if (plan != null) {
-          var task = dataModel.getTask(plan, int.parse(idTask));
-          if (task != null) {
-            Task _task = task;
-            _task.reminder = payload['deadline'] == States.TRUE
-                ? task.reminder
-                : States.NOTICE_NULL;
-            _task.complete = true;
-            _task.alert = false;
-            dataModel.updateTask(plan, task);
-            await writeData.then((value) {
-              ToDoon.navigatorKey.currentState!.pushAndRemoveUntil<void>(
-                MaterialPageRoute<void>(
-                    builder: (BuildContext context) => TasksPage(plan: plan)),
-                ModalRoute.withName(PAGE_HOME),
-              );
-            });
+      loadData.then((value) async {
+        var idPlan = payload['plan'];
+        var idTask = payload['task'];
+        if (idPlan != null && idTask != null) {
+          var plan = dataModel.getPlan(int.parse(idPlan));
+          if (plan != null) {
+            var task = dataModel.getTask(plan, int.parse(idTask));
+            if (task != null) {
+              Task _task = task;
+              _task.reminder = payload['deadline'] == States.TRUE
+                  ? task.reminder
+                  : States.NOTICE_NULL;
+              _task.complete = true;
+              _task.alert = false;
+              dataModel.updateTask(plan, task);
+              await writeData.then((value) {
+                ToDoon.navigatorKey.currentState!.pushAndRemoveUntil<void>(
+                  MaterialPageRoute<void>(
+                      builder: (BuildContext context) => TasksPage(plan: plan)),
+                  ModalRoute.withName(PAGE_HOME),
+                );
+              });
+            }
           }
         }
-      }
+      });
     }
   }
 
-  /// Handle notice of a task.
+  /// Handle the notification.
+  /// @route [TasksPage].
   @override
   Future<void> onCompleteBackground(ReceivedAction receivedAction) async {
     print('onBackground data');
@@ -326,7 +353,8 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     }
   }
 
-  /// Handle notice of a task.
+  /// Handle the notification.
+  /// This method is called when the notification is displayed.
   @override
   Future<void> onDisplayed(ReceivedNotification receivedNotification,
       NavigatorState currentState) async {
@@ -354,34 +382,26 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
   }
 
   /// MaterialPageRoute when app opened.
+  /// @route [TasksPage].
   @override
   MaterialPageRoute onAppKilled(ReceivedAction receivedAction) {
     var payload = receivedAction.payload;
     if (payload != null) {
-      var idPlan = payload['plan'];
-      var idTask = payload['task'];
-      if (idPlan != null && idTask != null) {
-        var plan = dataModel.getPlan(int.parse(idPlan));
-        if (plan != null) {
-          var task = dataModel.getTask(plan, int.parse(idTask));
-          if (task != null) {
-            Task _task = task;
-            _task.reminder = payload['deadline'] == States.TRUE
-                ? task.reminder
-                : States.NOTICE_NULL;
-            _task.complete = task.complete;
-            _task.alert = false;
-            dataModel.updateTask(plan, _task);
-            writeData;
+      loadData.then((value) {
+        var idPlan = payload['plan'];
+        if (idPlan != null) {
+          var plan = dataModel.getPlan(int.parse(idPlan));
+          if (plan != null) {
             return MaterialPageRoute(builder: (_) => TasksPage(plan: plan));
           }
         }
-      }
+      });
     }
-    return MaterialPageRoute(builder: (_) => const PlansPage());
+    return MaterialPageRoute(builder: (_) => PlansPage());
   }
 
-  /// Handle notice of a task.
+  /// Handle the notification.
+  /// This method is called when the notification is dismissed.
   @override
   Future<void> onDismiss(ReceivedAction receivedAction) async {
     print('onDismiss data');
@@ -409,7 +429,8 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
   }
 
   /// Format Iso8601 to String by current location.
-  // ignore: non_constant_identifier_names
+  /// @return [String].
+  @override
   String Iso8601toString(String? formattedString) {
     if (formattedString!.isNotEmpty && formattedString != States.NOTICE_NULL) {
       DateTime datetime = DateTime.parse(formattedString);
@@ -423,8 +444,21 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     return States.NOTICE_NULL;
   }
 
-  /// Format String to Iso8601 by current location..
-  // ignore: non_constant_identifier_names
+  /// Format Iso8601 to DateTime by current location.
+  /// @return [DateTime].
+  @override
+  DateTime? Iso8601toDateTime(String? formattedString) {
+    if (formattedString!.isNotEmpty && formattedString != States.NOTICE_NULL) {
+      DateTime datetime = DateTime.parse(formattedString);
+      return datetime;
+    }
+
+    return null;
+  }
+
+  /// Format String to Iso8601 by current location.
+  /// @return [String].
+  @override
   String StringtoIso8601(String? inputString) {
     try {
       if (inputString!.isNotEmpty && inputString != "(O.O)") {
@@ -442,8 +476,29 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     return States.NOTICE_NULL;
   }
 
+  /// Format String to DateTime by current location.
+  /// @return [DateTime].
+  @override
+  DateTime? StringtoDateTime(String? inputString) {
+    try {
+      if (inputString!.isNotEmpty && inputString != "(O.O)") {
+        initializeDateFormatting(Language.instance.current.code, null);
+        DateTime datetime = DateFormat.yMd(Language.instance.current.code)
+            .add_jms()
+            .parse(inputString);
+
+        return datetime;
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+
+    return null;
+  }
+
   /// Format DateTime to String by current location.
-  // ignore: non_constant_identifier_names
+  /// @return [String].
+  @override
   String DateTimetoString(DateTime? dateTime) {
     if (dateTime != null) {
       try {
@@ -459,28 +514,21 @@ class DataController with ChangeNotifier implements DataHandle, NoticeHandle {
     return States.NOTICE_NULL;
   }
 
-  /// Format Iso8601 to DateTime by current location.
-  // ignore: non_constant_identifier_names
-  DateTime? Iso8601toDateTime(String? formattedString) {
-    if (formattedString!.isNotEmpty && formattedString != States.NOTICE_NULL) {
-      DateTime datetime = DateTime.parse(formattedString);
-      return datetime;
-    }
-
-    return null;
-  }
-
   @override
   // ignore: must_call_super
   void dispose() {}
 }
 
+/// Data model.
 abstract class DataHandle {
-  // Plan Handle.
+  // Data model methods.
+  Future<String> get fetandcreateJsonFile;
+  Future<String> get loadData;
+  // Plan model methods.
   Future<String> doAddNewPlan(String name);
   Future<String> doEditPlan(Plan plan, String name);
   Future<String> doDeletePlan(Plan plan);
-  // Task Handle.
+  // Task model methods.
   Future<String> doAddNewTask(Plan plan,
       {String description = '',
       String date = '',
@@ -491,6 +539,7 @@ abstract class DataHandle {
   Future<String> doDeleteTask(Plan plan, Task task);
 }
 
+/// Notification model.
 abstract class NoticeHandle {
   Future<void> onComplete(ReceivedAction receivedAction);
   Future<void> onCompleteBackground(ReceivedAction receivedAction);
@@ -498,4 +547,13 @@ abstract class NoticeHandle {
       ReceivedNotification receivedNotification, NavigatorState currentState);
   MaterialPageRoute onAppKilled(ReceivedAction receivedAction);
   Future<void> onDismiss(ReceivedAction receivedAction);
+}
+
+/// DateTime model.
+abstract class DateTimeHandle {
+  String Iso8601toString(String? formattedString);
+  DateTime? Iso8601toDateTime(String? formattedString);
+  String StringtoIso8601(String? inputString);
+  DateTime? StringtoDateTime(String? inputString);
+  String DateTimetoString(DateTime? dateTime);
 }

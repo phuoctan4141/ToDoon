@@ -22,11 +22,13 @@ class Strings {
   late String Dismiss_Sure;
   late String Dismiss_Task;
   late String Dismissed;
+  late String Done;
   late String Dont_Allow;
   late String Edit;
   late String Edit_Plan;
   late String Edit_Sure;
   late String Edit_Task;
+  late String Focus_Content;
   late String Name_Plan;
   late String New_Plan;
   late String New_Task;
@@ -54,9 +56,11 @@ class Strings {
   late String Setting_Theme_Title;
   late String Settings_Title;
   late String Show_Menu;
+  late String Skip;
   late String Task;
   late String Task_Dismissed;
   late String Tasks;
+  late String Welcome_Content;
+  late String Welcome_Title;
   late String Wrong;
-  late String Focus_Content;
 }

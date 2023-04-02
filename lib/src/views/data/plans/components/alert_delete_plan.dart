@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 class AlertDeletePlan extends StatelessWidget {
@@ -22,7 +23,7 @@ class AlertDeletePlan extends StatelessWidget {
           child: ElevatedButton.icon(
               style: Themes.instance.DismissButtonStyle,
               onPressed: () => Navigator.of(context).pop(true),
-              icon: const Icon(Icons.delete),
+              icon: const Icon(ToDoonIcons.delete),
               label: Text(Language.instance.Delete_Plan)),
         ),
         ConstrainedBox(
@@ -31,7 +32,7 @@ class AlertDeletePlan extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: () => Navigator.of(context).pop(false),
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(ToDoonIcons.cancel),
             label: Text(Language.instance.Cancel),
           ),
         ),

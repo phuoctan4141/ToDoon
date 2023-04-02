@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 
 class BackButtonWidget extends StatelessWidget {
   const BackButtonWidget({super.key});
@@ -7,8 +9,8 @@ class BackButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: Language.instance.Back,
-      icon: const Icon(Icons.arrow_back),
+      tooltip: context.watch<Language>().Back,
+      icon: const Icon(ToDoonIcons.back),
       onPressed: () => Navigator.of(context).pop(),
     );
   }

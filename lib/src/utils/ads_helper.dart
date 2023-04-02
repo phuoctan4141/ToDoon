@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// AdMob Helper.
-class AdsHelper {
-  static final AdsHelper instance = AdsHelper();
+class AdsHelperZ {
+  static final AdsHelperZ instance = AdsHelperZ();
 
   static String get bannerAdUnitId => 'ca-app-pub-3940256099942544/6300978111';
 

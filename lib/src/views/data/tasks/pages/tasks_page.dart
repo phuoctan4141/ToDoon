@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
@@ -70,14 +71,11 @@ class _TasksPageState extends State<TasksPage> {
           onWillPop: () => Future.value(true),
           child: Scaffold(
             appBar: AppBar(
-              // ignore: prefer_const_constructors
-              leading: BackButtonWidget(),
-              title: Text(widget.plan.name.toString(),
+              leading: const BackButtonWidget(),
+              title: Text(widget.plan.name,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
-              // ignore: prefer_const_literals_to_create_immutables
               actions: [
                 _editPlan(context, widget.plan),
-                // ignore: prefer_const_constructors
                 _search(context, taskList),
               ],
             ),
@@ -109,7 +107,7 @@ class _TasksPageState extends State<TasksPage> {
         icon: const Icon(Icons.search));
   }
 
-  _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(BuildContext context) {
     final plans = context.read<DataController>().getAllPlans;
     // ignore: avoid_unnecessary_containers
     return PlansDrawer(
@@ -127,7 +125,7 @@ class _TasksPageState extends State<TasksPage> {
         : _buildContentTaskstList(context, tasksList);
   }
 
-  _buildContentTaskstList(BuildContext context, TasksList tasksList) {
+  Widget _buildContentTaskstList(BuildContext context, TasksList tasksList) {
     final notTasksList =
         DataController.instance.getNotCompleteTasksList(tasksList);
     final comTasksList =
@@ -204,7 +202,7 @@ class _TasksPageState extends State<TasksPage> {
     return FloatingActionButton(
       onPressed: () async => await addNewTask(context),
       tooltip: Language.instance.Add_Task,
-      child: const Icon(Icons.add_task),
+      child: const Icon(ToDoonIcons.add_task),
     );
   }
 
@@ -212,7 +210,7 @@ class _TasksPageState extends State<TasksPage> {
     return IconButton(
         tooltip: Language.instance.Edit_Plan,
         onPressed: () => editPlan(context, plan),
-        icon: const Icon(Icons.edit));
+        icon: const Icon(ToDoonIcons.edit_plan));
   }
 
   Widget _confirmDelete(BuildContext context) {
@@ -228,7 +226,7 @@ class _TasksPageState extends State<TasksPage> {
       readOnly: true,
       controller: textEditingReminder,
       child: IconButton(
-        icon: const Icon(Icons.alarm),
+        icon: const Icon(ToDoonIcons.add_reminder),
         onPressed: () => changeReminderAlert(context),
       ),
     );
@@ -294,16 +292,6 @@ class _TasksPageState extends State<TasksPage> {
 
           if (context.mounted) {
             if (done.compareTo(States.TRUE) == 0) {
-              // Create notification.
-              final _task = dataController.getLastTask(widget.plan);
-              if (_task != null) {
-                final date =
-                    DataController.instance.Iso8601toDateTime(_task.date);
-                if (date != null && date.isAfter(DateTime.now())) {
-                  NotificationsController.createTaskDeadlineNotification(
-                      widget.plan, _task, date);
-                }
-              }
               Navigator.of(context).pop(true);
             } else {
               Navigator.of(context).pop(false);
@@ -314,13 +302,6 @@ class _TasksPageState extends State<TasksPage> {
         onCancel: () => Navigator.of(context).pop(false),
       ),
     );
-  }
-
-  Future<void> changeComplete(BuildContext context, Task task, bool? p0) async {
-    setState(() {
-      task.complete = p0 ?? false;
-    });
-    await context.read<DataController>().writeData;
   }
 
   Future<void> dismissTask(BuildContext context, Task task) async {
@@ -399,22 +380,29 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
+  Future<String> doUpdateAlert(BuildContext context, Task task,
+      {required String textReminder, required bool alert}) async {
+    //Update a task.
+    final _reminder = DataController.instance.StringtoIso8601(textReminder);
+
+    final _task = Task(
+        id: task.id,
+        description: task.description,
+        date: task.date,
+        reminder: _reminder,
+        complete: task.complete,
+        alert: alert);
+    return await DataController.instance.doEditTask(widget.plan, _task);
+  }
+
   Future<void> onNotice(BuildContext context, Task task) async {
     if (_dateTime != null) {
       if (_dateTime!.isBefore(DateTime.now())) {
         // Show snackbar.
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            Language.instance.Wrong,
-            overflow: TextOverflow.ellipsis,
-          ),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(10),
-          duration: const Duration(seconds: 1),
-        ));
+        wrongWidget(context);
       }
 
-      final done = await doUpdateAlert(context, task,
+      final String done = await doUpdateAlert(context, task,
           textReminder: textEditingReminder.text, alert: true);
 
       if (context.mounted && done.compareTo(States.TRUE) == 0) {
@@ -435,43 +423,19 @@ class _TasksPageState extends State<TasksPage> {
         ));
       } else {
         // Show snackbar.
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-            Language.instance.Wrong,
-            overflow: TextOverflow.ellipsis,
-          ),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(10),
-          duration: const Duration(seconds: 1),
-        ));
+        wrongWidget(context);
       }
     } else {
       // Show snackbar.
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          Language.instance.Wrong,
-          overflow: TextOverflow.ellipsis,
-        ),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(10),
-        duration: const Duration(seconds: 1),
-      ));
+      wrongWidget(context);
     }
   }
 
-  Future<String> doUpdateAlert(BuildContext context, Task task,
-      {required String textReminder, required bool alert}) async {
-    //Update a task.
-    final _reminder = DataController.instance.StringtoIso8601(textReminder);
-
-    final _task = Task(
-        id: task.id,
-        description: task.description,
-        date: task.date,
-        reminder: _reminder,
-        complete: task.complete,
-        alert: alert);
-    return await DataController.instance.doEditTask(widget.plan, _task);
+  Future<void> changeComplete(BuildContext context, Task task, bool? p0) async {
+    setState(() {
+      task.complete = p0 ?? false;
+    });
+    await context.read<DataController>().writeData;
   }
 
   void changeReminderAlert(BuildContext context) {
@@ -493,6 +457,5 @@ class _TasksPageState extends State<TasksPage> {
       },
     );
   }
-
 //end code
 }

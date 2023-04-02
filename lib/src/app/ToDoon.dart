@@ -31,7 +31,6 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    fetandhandleData(context);
     NotificationsController.initializeNotificationsEventListeners();
   }
 
@@ -58,6 +57,7 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     String initialRoute =
         NotificationsController.initialAction == null ? PAGE_HOME : PAGE_PLAN;
+    initialRoute = DataController.isFirstTime ? PAGE_INTRO : initialRoute;
 
     return Consumer<Themes>(
       builder: (context, themes, child) {
@@ -76,7 +76,7 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
                 if (settings.name == PAGE_PLAN) {
                   return onAppKilled(context);
                 }
-                return MaterialPageRoute(builder: (_) => const PlansPage());
+                return null;
               },
               locale: Locale(language.current.code),
               localizationsDelegates: const [
@@ -95,21 +95,13 @@ class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
     );
   }
 
-  void fetandhandleData(BuildContext context) {
-    context.read<DataController>().fetandcreateJsonFile().then((state) {
-      if (state.compareTo(States.isEXISTS) == 0) {
-        context.read<DataController>().loadData;
-      }
-    });
-  }
-
   MaterialPageRoute onAppKilled(BuildContext context) {
     var initialAction = NotificationsController.initialAction;
 
     if (initialAction != null) {
       return context.read<DataController>().onAppKilled(initialAction);
     } else {
-      return MaterialPageRoute(builder: (_) => const PlansPage());
+      return MaterialPageRoute(builder: (_) => PlansPage());
     }
   }
 // end code.

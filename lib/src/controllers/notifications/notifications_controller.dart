@@ -128,13 +128,10 @@ class NotificationsController {
           onSilentActionHandle(receivedAction);
         }
         break;
-      case NotificationLifeCycle.AppKilled:
+      default:
         {
           onSilentActionHandle(receivedAction);
         }
-        break;
-      default:
-        {}
         break;
     }
   }

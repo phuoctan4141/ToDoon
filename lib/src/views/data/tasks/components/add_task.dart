@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/views/data/tasks/components/task_item.dart';
 
@@ -53,7 +54,7 @@ class AddTask extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onCancel,
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(ToDoonIcons.cancel),
             label: Text(Language.instance.Cancel),
           ),
         ),
@@ -63,7 +64,7 @@ class AddTask extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onAdd,
-            icon: const Icon(Icons.add_task),
+            icon: const Icon(ToDoonIcons.add_task),
             label: Text(Language.instance.Add_Task),
             style: Themes.instance.AddButtonStyle,
           ),
@@ -100,7 +101,7 @@ class AddTask extends StatelessWidget {
         keyboardType: TextInputType.datetime,
         child: IconButton(
           onPressed: () => changeDate(context),
-          icon: const Icon(Icons.event_available_outlined),
+          icon: const Icon(ToDoonIcons.dueDate),
         ),
       ),
       onTap: () => changeDate(context),
@@ -118,7 +119,7 @@ class AddTask extends StatelessWidget {
         controller: textEditingReminder,
         child: IconButton(
           onPressed: () => changeReminder(context),
-          icon: const Icon(Icons.alarm),
+          icon: const Icon(ToDoonIcons.reminder),
         ),
       ),
       onTap: () => changeReminder(context),

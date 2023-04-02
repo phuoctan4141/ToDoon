@@ -148,7 +148,11 @@ class DataModel implements PlanModel, TasksModel {
   @override
   Plan? getPlan(int id) {
     final plans = List.unmodifiable(_inMemoryCache.plans);
-    return plans.firstWhereOrNull((element) => element.id == id);
+    final plan = plans.firstWhereOrNull((element) => element.id == id);
+    if (plan != null) {
+      return Plan(id: plan.id, name: plan.name, tasks: plan.tasks);
+    }
+    return null;
   }
 
   /// Add a plan to the _storage.
@@ -202,7 +206,7 @@ class DataModel implements PlanModel, TasksModel {
       String reminder = '',
       bool complete = false,
       bool alert = false}) {
-    // Find a plan to accommodate task.
+    // Find [plan] in our list of plans.
     final _indexPlan = indexPlan(plan);
     if (_indexPlan == -1) return;
 
@@ -232,8 +236,17 @@ class DataModel implements PlanModel, TasksModel {
     final _indexPLan = indexPlan(plan);
     if (_indexPLan == -1) return null;
     final tasks = List.unmodifiable(plan.tasks);
-
-    return tasks.firstWhereOrNull((element) => element.id == id);
+    final task = tasks.firstWhereOrNull((element) => element.id == id);
+    if (task != null) {
+      return Task(
+          id: task.id,
+          description: task.description,
+          date: task.date,
+          reminder: task.reminder,
+          complete: task.complete,
+          alert: task.alert);
+    }
+    return null;
   }
 
   @override
@@ -306,17 +319,6 @@ class DataModel implements PlanModel, TasksModel {
     return tasks.indexWhere((element) => element.id == task.id);
   }
 
-  /// Check for duplicates and return string.
-  String checkForDuplicates(Iterable<String> items, String text) {
-    final duplicatedCount = items.where((item) => item.contains(text)).length;
-    if (duplicatedCount > 0) {
-      text += '${duplicatedCount - 1}';
-      checkForDuplicates(items, text);
-    }
-
-    return text;
-  }
-
   void dispose() {
     _storage.plans.clear();
     _inMemoryCache.plans.clear();
@@ -351,4 +353,16 @@ abstract class TasksModel {
   int indexTask(Plan plan, Task task);
 }
 
+/// Check for duplicates and return string.
+String checkForDuplicates(Iterable<String> items, String text) {
+  final duplicatedCount = items.where((item) => item.contains(text)).length;
+  if (duplicatedCount > 0) {
+    text += '${duplicatedCount - 1}';
+    checkForDuplicates(items, text);
+  }
+
+  return text;
+}
+
+/// Create Unique ID.
 int createUniqueId() => DateTime.now().millisecondsSinceEpoch.remainder(100000);

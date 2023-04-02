@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 // ignore: camel_case_types, constant_identifier_names
@@ -32,7 +33,7 @@ class MenuTask extends StatelessWidget {
       runSpacing: 2.0,
       alignment: WrapAlignment.center,
       runAlignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         _buildInkAlert(context),
         _buildPopupMenuButton(context),
@@ -41,19 +42,23 @@ class MenuTask extends StatelessWidget {
   }
 
   _buildInkAlert(BuildContext context) {
-    return Ink(
-      decoration: ShapeDecoration(
-        color: Themes.instance.AlertCompleteBolderColor(alert),
-        shape: RoundedRectangleBorder(
-            borderRadius: Themes.instance.switchRollBorder),
+    return Material(
+      color: Themes.instance.AlertCompleteBolderColor(alert),
+      shadowColor: Themes.instance.AlertCompleteBolderColor(alert),
+      borderRadius: Themes.instance.switchRollBorder,
+      child: InkWell(
+        borderRadius: Themes.instance.switchRollBorder,
+        onTap: onAlert,
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Icon(
+            ToDoonIcons.getAlertState(alert),
+            semanticLabel: Language.instance.Reminder,
+            color: Themes.instance.AlertCompleteColor(alert),
+          ),
+        ),
       ),
-      child: IconButton(
-          onPressed: onAlert,
-          tooltip: Language.instance.Reminder,
-          color: Themes.instance.AlertCompleteColor(alert),
-          icon: alert
-              ? const Icon(Icons.alarm_on_sharp)
-              : const Icon(Icons.alarm_off_sharp)),
     );
   }
 
@@ -67,13 +72,13 @@ class MenuTask extends StatelessWidget {
         PopupMenuItem(
             value: onFunc.Edit,
             child: ListTile(
-              leading: const Icon(Icons.edit),
+              leading: const Icon(ToDoonIcons.edit),
               title: Text(Language.instance.Edit),
             )),
         PopupMenuItem(
             value: onFunc.Delete,
             child: ListTile(
-              leading: const Icon(Icons.delete_forever),
+              leading: const Icon(ToDoonIcons.delete),
               title: Text(Language.instance.Detete),
             )),
       ],

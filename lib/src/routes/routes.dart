@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:todoon/src/routes/routes_export.dart';
 
+const String PAGE_INTRO = '/intro';
 const String PAGE_HOME = '/';
 const String PAGE_PLAN = '/plan';
 const String PAGE_PLANS_TODAY = '/plans_today';
@@ -10,7 +11,8 @@ const String PAGE_TASK = '/task';
 const String PAGE_SETTINGS = '/settings';
 
 Map<String, WidgetBuilder> materialRoutes = {
-  PAGE_HOME: (context) => const PlansPage(),
+  PAGE_INTRO: (context) => const IntroPage(),
+  PAGE_HOME: (context) => PlansPage(),
   PAGE_SETTINGS: (context) => const SettingsPage(),
   PAGE_PLAN: (context) =>
       TasksPage(plan: ModalRoute.of(context)!.settings.arguments as Plan),

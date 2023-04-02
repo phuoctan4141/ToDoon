@@ -3,13 +3,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/settings_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/routes/routes.dart';
-import 'package:todoon/src/utils/ads_helper.dart';
 import 'package:todoon/src/views/settings/components/settings_section.dart';
 import 'package:todoon/src/views/widgets/back_button_widget.dart';
 
@@ -76,14 +75,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _adsContainer(BuildContext context) {
     if (Platform.isAndroid) {
-      final _bannerAd = AdsHelper.instance.getBannerAd?..load();
+      // final _bannerAd = AdsHelper.instance.getBannerAd?..load();
       return Card(
         child: SizedBox(
           height: 100,
-          child: AdWidget(
-            ad: _bannerAd!,
-            key: UniqueKey(),
-          ),
+          child: Container(),
         ),
       );
     } else {
@@ -98,6 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
     late ColorMode color = settingsController.colorMode;
 
     return SettingsSection(
+      icon: ToDoonIcons.getThemeState(Themes.instance.isLightMode),
       title: Language.instance.Setting_Theme_Title,
       children: themeList
           .map(
@@ -141,6 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
     late ColorMode color = settingsController.colorMode;
 
     return SettingsSection(
+      icon: ToDoonIcons.getColorState(color),
       title: Language.instance.Setting_Colors_Title,
       children: colorList
           .map(
@@ -166,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // Set the theme mode title.
+  // Set the color mode title.
   String colorModeTitle(BuildContext context, int index) {
     if (index == 1) {
       return Language.instance.Setting_Bleed_Title;
@@ -180,6 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
     late LanguageData current = context.watch<Language>().current;
 
     return SettingsSection(
+      icon: ToDoonIcons.getLanguageState(current.locate),
       title: Language.instance.Setting_Language_Title,
       children: available
           .map((data) => RadioListTile<LanguageData>(

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 
 // ignore: camel_case_types, constant_identifier_names
 enum onFunc { Edit, Delete }
@@ -24,13 +25,13 @@ class MenuPlan extends StatelessWidget {
         PopupMenuItem(
             value: onFunc.Edit,
             child: ListTile(
-              leading: const Icon(Icons.edit),
+              leading: const Icon(ToDoonIcons.edit),
               title: Text(Language.instance.Edit),
             )),
         PopupMenuItem(
             value: onFunc.Delete,
             child: ListTile(
-              leading: const Icon(Icons.delete_forever),
+              leading: const Icon(ToDoonIcons.delete),
               title: Text(Language.instance.Detete),
             )),
       ],

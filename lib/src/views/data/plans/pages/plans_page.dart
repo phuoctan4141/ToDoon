@@ -3,19 +3,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/constants/strings.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
-import 'package:todoon/src/models/plan/plan_export.dart';
-import 'package:todoon/src/routes/routes.dart';
-import 'package:todoon/src/utils/ads_helper.dart';
+import 'package:todoon/src/routes/routes_export.dart';
 import 'package:todoon/src/views/data/plans/components/plans_components.dart';
-import 'package:todoon/src/views/data/plans/pages/plans_today_page.dart';
-import 'package:todoon/src/views/data/tasks/pages/tasks_page.dart';
 import 'package:todoon/src/views/widgets/allow_notices_widget.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
 import 'package:todoon/src/views/widgets/empty_icon_widget.dart';
@@ -23,7 +20,8 @@ import 'package:todoon/src/views/widgets/wrong_widget.dart';
 
 class PlansPage extends StatefulWidget {
   static const routeName = PAGE_HOME;
-  const PlansPage({super.key});
+  // ignore: prefer_const_constructors_in_immutables
+  PlansPage({super.key});
 
   @override
   State<PlansPage> createState() => _PlansPageState();
@@ -40,13 +38,14 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
   late PlansList plansListToday = PlansList(plans: []);
   late bool isLoading = true;
 
-  NativeAd? _nativeAd;
+  //NativeAd? _nativeAd;
 
   @override
   void initState() {
     super.initState();
 
     scrollController = ScrollController();
+    planController = TextEditingController();
     fetandhandleData(context);
     AllowNoticesWidget(context);
 
@@ -62,7 +61,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
     scrollController.dispose();
     planController.dispose();
     animationController.dispose();
-    _nativeAd?.dispose();
+    //_nativeAd?.dispose();
     super.dispose();
   }
 
@@ -85,7 +84,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
             leading: Builder(
               builder: (BuildContext context) {
                 return IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const Icon(ToDoonIcons.drawer),
                   onPressed: () {
                     Scaffold.of(context).openDrawer();
                   },
@@ -119,7 +118,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
           showSearch(context: context, delegate: PlanSearchDelegate(plansList));
         },
         tooltip: Language.instance.Search,
-        icon: const Icon(Icons.search));
+        icon: const Icon(ToDoonIcons.search));
   }
 
   // Load data from _inMemoryCache.
@@ -166,21 +165,24 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
   }
 
   Widget _doWorkContainer(BuildContext context) {
-    return Card(
-      child: Container(
-        margin: const EdgeInsets.all(8.0),
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        width: (MediaQuery.of(context).size.width * (2 / 3) - 40),
+    return GestureDetector(
+      onDoubleTap: () => Navigator.pushNamed(context, IntroPage.routeName),
+      child: Card(
         child: Container(
-          alignment: Alignment.center,
-          height: 104,
-          width: (MediaQuery.of(context).size.width * (2 / 3) - 56),
-          child: Lottie.asset(
-            'assets/icons/do_work.json',
-            controller: animationController,
+          margin: const EdgeInsets.all(8.0),
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          width: (MediaQuery.of(context).size.width * (2 / 3) - 40),
+          child: Container(
+            alignment: Alignment.center,
+            height: 104,
+            width: (MediaQuery.of(context).size.width * (2 / 3) - 56),
+            child: Lottie.asset(
+              ToDoonIcons.do_work_lottie,
+              controller: animationController,
+            ),
           ),
         ),
       ),
@@ -188,7 +190,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
   }
 
   Widget _adsContainer(BuildContext context) {
-    _nativeAd = AdsHelper.instance.getNativeAd;
+    //_nativeAd = AdsHelper.instance.getNativeAd;
     if (Platform.isAndroid) {
       return Card(
         child: Container(
@@ -202,9 +204,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
             alignment: Alignment.center,
             height: 104,
             width: (MediaQuery.of(context).size.width * (2 / 3) - 56),
-            child: AdWidget(
-              ad: _nativeAd!..load(),
-            ),
+            child: Container(),
           ),
         ),
       );
@@ -242,7 +242,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
         await addNewPlan(context);
       },
       tooltip: Language.instance.Add_Plan,
-      child: const Icon(Icons.format_list_bulleted_add),
+      child: const Icon(ToDoonIcons.add_plan),
     );
   }
 

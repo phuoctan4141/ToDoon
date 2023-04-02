@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/routes/routes.dart';
@@ -31,7 +32,7 @@ class TasksDrawer extends StatelessWidget {
       children: [
         ListTile(
           leading:
-              Icon(Icons.view_list, color: Themes.instance.RadioSelectedColor),
+              Icon(ToDoonIcons.task, color: Themes.instance.RadioSelectedColor),
           title: Text(Language.instance.Tasks,
               // ignore: prefer_const_constructors
               style: Themes.instance.DrawerTitleContentTextStyle),

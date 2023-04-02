@@ -1,19 +1,17 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, non_constant_identifier_names, no_leading_underscores_for_local_identifiers, unused_local_variable
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/routes/routes.dart';
-import 'package:todoon/src/utils/ads_helper.dart';
 import 'package:todoon/src/views/data/tasks/components/tasks_components.dart';
 import 'package:todoon/src/views/widgets/back_button_widget.dart';
 import 'package:todoon/src/views/widgets/drawer_widget.dart';
@@ -142,24 +140,6 @@ class _TaskEditPageState extends State<TaskEditPage> {
   // View Widgets  ////////////
   // View Widgets /////////////
   /////////////////////////////
-  ///
-  ///
-  Widget _adsContainer(BuildContext context) {
-    if (Platform.isAndroid) {
-      final _bannerAd = AdsHelper.instance.getBannerAd?..load();
-      return Card(
-        child: SizedBox(
-          height: 100,
-          child: AdWidget(
-            ad: _bannerAd!,
-            key: UniqueKey(),
-          ),
-        ),
-      );
-    } else {
-      return Container();
-    }
-  }
 
   _buildDrawer(BuildContext context) {
     final tasks = plan.tasks;
@@ -176,16 +156,16 @@ class _TaskEditPageState extends State<TaskEditPage> {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
 
-    return Column(
-      children: <Widget>[
-        // Content of the task.
-        Card(
-          child: Column(
+    return Card(
+      child: Column(
+        children: <Widget>[
+          // Content of the task.
+          Column(
             children: <Widget>[
               _TaskDecription(context),
               _TaskDate(context),
               _TaskReminder(context),
-              // const Divider(thickness: 3, indent: 20, endIndent: 20),
+              //const Divider(thickness: 3, indent: 20, endIndent: 20),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -197,24 +177,24 @@ class _TaskEditPageState extends State<TaskEditPage> {
               const SizedBox(height: 8),
             ],
           ),
-        ),
-        // Action edit task.
-        const SizedBox(height: 8),
-        SafeArea(
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              _CancelEdit(context),
-              const SizedBox(width: 8),
-              _AcceptEdit(context),
-            ],
+          // Action edit task.
+          const SizedBox(height: 8),
+          SafeArea(
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _CancelEdit(context),
+                const SizedBox(width: 8),
+                _AcceptEdit(context),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        //_adsContainer(context),
-      ],
+          const SizedBox(height: 8),
+          //_adsContainer(context),
+        ],
+      ),
     );
   }
 
@@ -242,7 +222,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
         keyboardType: TextInputType.datetime,
         child: IconButton(
           onPressed: () => changeDate(context),
-          icon: const Icon(Icons.event_available_outlined),
+          icon: const Icon(ToDoonIcons.dueDate),
         ),
       ),
       onTap: () => changeDate(context),
@@ -263,7 +243,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
           onPressed: () async {
             changeReminder(context);
           },
-          icon: const Icon(Icons.alarm),
+          icon: const Icon(ToDoonIcons.reminder),
         ),
       ),
       onTap: () async {
@@ -314,7 +294,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
       readOnly: true,
       controller: textEditingReminder,
       child: IconButton(
-        icon: const Icon(Icons.alarm),
+        icon: const Icon(ToDoonIcons.add_reminder),
         onPressed: () => changeReminderAlert(context),
       ),
     );
@@ -323,11 +303,12 @@ class _TaskEditPageState extends State<TaskEditPage> {
   Widget _CancelEdit(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(
+        minHeight: height! / 18,
         minWidth: width! / 2 - 20,
       ),
       child: ElevatedButton.icon(
         onPressed: () => Navigator.of(context).pop(),
-        icon: const Icon(Icons.cancel),
+        icon: const Icon(ToDoonIcons.cancel),
         label: Text(Language.instance.Cancel),
       ),
     );
@@ -336,13 +317,14 @@ class _TaskEditPageState extends State<TaskEditPage> {
   Widget _AcceptEdit(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(
+        minHeight: height! / 18,
         minWidth: width! / 2 - 20,
       ),
       child: ElevatedButton.icon(
         onPressed: () async {
           await acceptEditTask(context);
         },
-        icon: const Icon(Icons.edit_note),
+        icon: const Icon(ToDoonIcons.edit_task),
         label: Text(Language.instance.OK),
         style: Themes.instance.AddButtonStyle,
       ),
@@ -353,7 +335,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
     return IconButton(
         tooltip: Language.instance.Edit_Plan,
         onPressed: () => editPlan(context, plan),
-        icon: const Icon(Icons.edit));
+        icon: const Icon(ToDoonIcons.edit_plan));
   }
 
   /////////////////////////////

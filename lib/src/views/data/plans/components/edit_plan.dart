@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 class EditPlan extends StatelessWidget {
@@ -42,7 +43,7 @@ class EditPlan extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onCancel,
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(ToDoonIcons.cancel),
             label: Text(Language.instance.Cancel),
           ),
         ),
@@ -52,7 +53,7 @@ class EditPlan extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onEdit,
-            icon: const Icon(Icons.edit),
+            icon: const Icon(ToDoonIcons.edit),
             label: Text(Language.instance.OK),
             style: Themes.instance.AddButtonStyle,
           ),

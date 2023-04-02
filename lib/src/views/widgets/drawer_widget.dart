@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/strings.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/routes/routes_export.dart';
 
@@ -54,9 +55,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   child:
                       Card(child: SingleChildScrollView(child: widget.content)))
               : Container(),
-          const SizedBox(height: 3.0),
-          _adsContainer(context),
-          const SizedBox(height: 3.0),
+          //const SizedBox(height: 3.0),
+          //_adsContainer(context),
+          // const SizedBox(height: 3.0),
           // (content != null) ? const Divider(thickness: 1) : Container(),
         ],
       ),
@@ -69,14 +70,14 @@ class _DrawerWidgetState extends State<DrawerWidget> {
       child: DrawerHeader(
         decoration: BoxDecoration(
           image: const DecorationImage(
-              fit: BoxFit.cover, image: AssetImage('assets/icons/banner.png')),
+              fit: BoxFit.cover, image: AssetImage(ToDoonIcons.banner_assets)),
           color: Themes.instance.isLightMode
               ? Themes.instance.lightTheme.colorScheme.surface
               : Themes.instance.darkTheme.colorScheme.surface,
         ),
         child: ListTile(
           leading:
-              const Image(image: AssetImage('assets/icons/todoon_256.ico')),
+              const Image(image: AssetImage(ToDoonIcons.todoon_filled_assets)),
           title: Text(Strings.NAME_APP,
               style: TextStyle(fontWeight: FontWeight.bold)),
         ),
@@ -87,7 +88,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   Widget _Home(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(Icons.home, color: Themes.instance.DrawerIconColor),
+        leading: Icon(ToDoonIcons.home, color: Themes.instance.DrawerIconColor),
         title: const Text(Strings.NAME_APP,
             style: TextStyle(fontWeight: FontWeight.bold)),
         onTap: () {
@@ -104,7 +105,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   Widget _Settings(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(Icons.settings, color: Themes.instance.DrawerIconColor),
+        leading:
+            Icon(ToDoonIcons.settings, color: Themes.instance.DrawerIconColor),
         title: Text(Language.instance.Settings_Title,
             style: TextStyle(fontWeight: FontWeight.bold)),
         onTap: () {

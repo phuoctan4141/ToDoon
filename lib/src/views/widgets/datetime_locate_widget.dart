@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable, non_constant_identifier_names, prefer_const_constructors
 import 'package:flutter/material.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
@@ -24,7 +25,7 @@ class DateTimeLocateWidget extends StatelessWidget {
         Row(
           children: [
             Icon(
-              Icons.event_available_outlined,
+              ToDoonIcons.dueDate,
               color: Themes.instance.TaskItemCompleteColor(complete),
             ),
             Text(
@@ -36,7 +37,7 @@ class DateTimeLocateWidget extends StatelessWidget {
         ),
         Row(
           children: [
-            Icon(Icons.alarm,
+            Icon(ToDoonIcons.reminder,
                 color: Themes.instance.TaskItemCompleteColor(complete)),
             Text(
               DateTimetoString(reminderString),

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 Future<bool> AllowNoticesWidget(BuildContext context) async {
@@ -28,7 +29,7 @@ Future<bool> AllowNoticesWidget(BuildContext context) async {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: const Icon(Icons.notifications_off),
+                  icon: Icon(ToDoonIcons.notifications_off),
                   label: Text(Language.instance.Dont_Allow),
                 ),
               ),
@@ -42,7 +43,7 @@ Future<bool> AllowNoticesWidget(BuildContext context) async {
                     AwesomeNotifications()
                         .requestPermissionToSendNotifications();
                   },
-                  icon: const Icon(Icons.notifications_on),
+                  icon: Icon(ToDoonIcons.notifications_on),
                   label: Text(Language.instance.Allow),
                   style: Themes.instance.AddButtonStyle,
                 ),

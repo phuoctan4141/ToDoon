@@ -9,10 +9,9 @@ part of 'plan.dart';
 Plan _$PlanFromJson(Map<String, dynamic> json) => Plan(
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
-      tasks: (json['tasks'] as List<dynamic>?)
-              ?.map((e) => Task.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
+      tasks: (json['tasks'] as List<dynamic>)
+          .map((e) => Task.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$PlanToJson(Plan instance) => <String, dynamic>{

@@ -1,11 +1,13 @@
+// ignore_for_file: no_leading_underscores_for_local_identifiers
+
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/states.dart';
-import 'package:todoon/src/constants/strings.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/utils/file_manager.dart';
 
@@ -25,6 +27,28 @@ class SettingsController with SettingData, ChangeNotifier {
   static Future<void> initialize() async {
     await instance.createSettingFile();
     await instance.loadSetting();
+  }
+
+  /// Using the app for the first time.
+  /// If [true] then show [IntroPage] screen.
+  Future<void> get onFirstTime async {
+    Language.instance.available.then((available) {
+      late Locale _deviceLocale = window.locale;
+      // Set lang for the _deviceLocale language.
+      if (_deviceLocale.languageCode != Language.instance.current.locate) {
+        if (_deviceLocale.languageCode == 'vi') {
+          final value =
+              available.firstWhere((element) => element.locate == 'vi');
+          Language.instance.set(value: value);
+        } else {
+          final value =
+              available.firstWhere((element) => element.locate == 'en');
+          Language.instance.set(value: value);
+        }
+        // Save setting.
+        saveSetting();
+      }
+    });
   }
 
   /// Create [settings.json] & notifies the listeners.

@@ -9,6 +9,8 @@ class SwitchWidget extends StatefulWidget {
   bool value;
   String activeText;
   String inactiveText;
+  IconData? activeIcon;
+  IconData? inativeIcon;
   double? width;
   double? height;
   double? switchRollSize;
@@ -22,6 +24,8 @@ class SwitchWidget extends StatefulWidget {
     required this.value,
     this.activeText = 'On',
     this.inactiveText = 'Off',
+    this.activeIcon,
+    this.inativeIcon,
     this.width = 70.0,
     this.height = 70.0,
     this.switchRollSize = 25.0,
@@ -189,6 +193,9 @@ class _SwitchWidgetState extends State<SwitchWidget>
             borderRadius: Themes.instance.switchRollBorder,
             color: Themes.instance.switchRollItemColor,
           ),
+          child: widget.value
+              ? Icon(widget.activeIcon ?? Icons.done_sharp)
+              : Icon(widget.inativeIcon ?? Icons.clear_sharp),
         ),
       ),
     );
@@ -221,6 +228,9 @@ class _SwitchWidgetState extends State<SwitchWidget>
     } else {
       _animationController.forward();
     }
-    widget.value == false ? widget.onChanged(true) : widget.onChanged(false);
+
+    setState(() {
+      widget.value == false ? widget.onChanged(true) : widget.onChanged(false);
+    });
   }
 }

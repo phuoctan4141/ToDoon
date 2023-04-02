@@ -11,7 +11,7 @@ class BleedTheme {
         ),
       );
 
-  static get switchRollBorder => BorderRadius.circular(20);
+  static get switchRollBorder => BorderRadius.circular(50);
 
   static const lightColorScheme = ColorScheme(
     brightness: Brightness.light,

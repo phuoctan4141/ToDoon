@@ -74,7 +74,7 @@ class FileManager {
 class Json {
   static String? tryEncode(dynamic data) {
     try {
-      return jsonEncode(data);
+      return json.encode(data);
     } catch (e) {
       return null;
     }
@@ -82,7 +82,7 @@ class Json {
 
   static dynamic tryDecode(String data) {
     try {
-      return jsonDecode(data);
+      return json.decode(data);
     } catch (e) {
       return null;
     }

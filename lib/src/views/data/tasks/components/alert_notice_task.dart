@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 class AlertNoticeTask extends StatelessWidget {
@@ -33,7 +34,7 @@ class AlertNoticeTask extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onCancel,
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(ToDoonIcons.cancel),
             label: Text(Language.instance.Cancel),
           ),
         ),
@@ -44,7 +45,7 @@ class AlertNoticeTask extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onNotice,
-            icon: const Icon(Icons.edit_note),
+            icon: const Icon(ToDoonIcons.edit_task),
             label: Text(Language.instance.OK),
             style: Themes.instance.AddButtonStyle,
           ),

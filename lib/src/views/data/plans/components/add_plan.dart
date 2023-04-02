@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
 class AddPLan extends StatelessWidget {
@@ -44,7 +45,7 @@ class AddPLan extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onCancel,
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(ToDoonIcons.cancel),
             label: Text(Language.instance.Cancel),
           ),
         ),
@@ -54,7 +55,7 @@ class AddPLan extends StatelessWidget {
           ),
           child: ElevatedButton.icon(
             onPressed: onAdd,
-            icon: const Icon(Icons.format_list_bulleted_add),
+            icon: const Icon(ToDoonIcons.add_plan),
             label: Text(Language.instance.Add_Plan),
             style: Themes.instance.AddButtonStyle,
           ),

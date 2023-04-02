@@ -73,6 +73,8 @@ class _PlansTodayPageState extends State<PlansTodayPage> {
               return ListTile(
                 leading: CircleAvatar(child: Text(planPanel.plan.name[0])),
                 title: Text(planPanel.plan.name),
+                onTap: () => setState(
+                    () => planPanel.isExpanded = !planPanel.isExpanded),
               );
             },
             body: _buildTasksList(

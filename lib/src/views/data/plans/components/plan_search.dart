@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
+import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 import 'package:todoon/src/views/data/tasks/pages/tasks_page.dart';
 
@@ -22,7 +23,7 @@ class PlanSearchDelegate extends SearchDelegate {
             query = '';
           },
           tooltip: Language.instance.Refresh,
-          icon: const Icon(Icons.replay))
+          icon: const Icon(ToDoonIcons.refresh))
     ];
   }
 
@@ -33,7 +34,7 @@ class PlanSearchDelegate extends SearchDelegate {
           close(context, null);
         },
         tooltip: Language.instance.Back,
-        icon: const Icon(Icons.arrow_back));
+        icon: const Icon(ToDoonIcons.back));
   }
 
   @override

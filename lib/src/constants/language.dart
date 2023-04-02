@@ -104,11 +104,13 @@ class Language extends Strings with ChangeNotifier {
     Dismiss_Sure = map['Dismiss_Sure']!;
     Dismiss_Task = map['Dismiss_Task']!;
     Dismissed = map['Dismissed']!;
+    Done = map['Done']!;
     Dont_Allow = map['Dont_Allow']!;
     Edit = map['Edit']!;
     Edit_Plan = map['Edit_Plan']!;
     Edit_Sure = map['Edit_Sure']!;
     Edit_Task = map['Edit_Task']!;
+    Focus_Content = map['Focus_Content']!;
     Name_Plan = map['Name_Plan']!;
     New_Plan = map['New_Plan']!;
     New_Task = map['New_Task']!;
@@ -136,11 +138,13 @@ class Language extends Strings with ChangeNotifier {
     Setting_Theme_Title = map['Setting_Theme_Title']!;
     Settings_Title = map['Settings_Title']!;
     Show_Menu = map['Show_Menu']!;
+    Skip = map['Skip']!;
     Task = map['Task']!;
     Task_Dismissed = map['Task_Dismissed']!;
     Tasks = map['Tasks']!;
+    Welcome_Content = map['Welcome_Content']!;
+    Welcome_Title = map['Welcome_Title']!;
     Wrong = map['Wrong']!;
-    Focus_Content = map['Focus_Content']!;
 
     current = value;
     notifyListeners();
