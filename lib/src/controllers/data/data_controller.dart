@@ -185,7 +185,12 @@ class DataController
     try {
       //Delete all notifications.
       for (var task in plan.tasks) {
-        if (task.alert == true) {
+        if (task.alert == true || task.date != States.NOTICE_NULL) {
+          // deadline notification.
+          NotificationsController.cancelScheduledNotificationsById(
+              plan.id + task.id);
+          NotificationsController.dismissNotificationsById(plan.id + task.id);
+          // reminder notification.
           NotificationsController.cancelScheduledNotificationsById(task.id);
           NotificationsController.dismissNotificationsById(task.id);
         }
@@ -266,6 +271,10 @@ class DataController
   @override
   Future<String> doDeleteTask(Plan plan, Task task) async {
     try {
+      // deadline notification.
+      NotificationsController.cancelScheduledNotificationsById(
+          plan.id + task.id);
+      NotificationsController.dismissNotificationsById(plan.id + task.id);
       // Delete a notification.
       NotificationsController.cancelScheduledNotificationsById(task.id);
       NotificationsController.dismissNotificationsById(task.id);
