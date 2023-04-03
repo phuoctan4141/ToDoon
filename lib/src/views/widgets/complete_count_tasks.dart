@@ -1,8 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, must_be_immutable
 import 'package:flutter/material.dart';
+
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 
+/// Complete Count Tasks Widget.
 class CompleteCountTasks extends StatelessWidget {
   TasksList tasksList;
 

@@ -31,7 +31,7 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
   late ScrollController scrollController;
   late TextEditingController planController;
 
-  late AnimationController animationController;
+  AnimationController? animationController;
   late AnimationController pieController;
 
   late PlansList plansList = PlansList(plans: []);
@@ -53,14 +53,14 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 3),
     );
-    animationController.forward();
+    animationController!.forward();
   }
 
   @override
   void dispose() {
     scrollController.dispose();
     planController.dispose();
-    animationController.dispose();
+    animationController?.dispose();
     //_nativeAd?.dispose();
     super.dispose();
   }
@@ -73,8 +73,8 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
         plansListToday = dataController.getDataToday;
 
         dataController.addListener(() {
-          animationController.reset();
-          animationController.forward();
+          animationController!.reset();
+          animationController!.forward();
         });
 
         return Scaffold(

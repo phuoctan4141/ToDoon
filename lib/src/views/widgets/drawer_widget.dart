@@ -9,6 +9,7 @@ import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/routes/routes_export.dart';
 
+/// Drawer Widget.
 class DrawerWidget extends StatefulWidget {
   bool notHome;
   Widget? content;
@@ -50,6 +51,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
           _Header(context),
           _Home(context),
           _Settings(context),
+
+          /// Content.
           (widget.content != null)
               ? Expanded(
                   child:
@@ -64,6 +67,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     );
   }
 
+  /// Header Drawer.
   Widget _Header(BuildContext context) {
     return SizedBox(
       height: 150,
@@ -85,6 +89,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     );
   }
 
+  /// Home Drawer.
+  /// If [notHome] is true, then the home button will not be routed to the home page.
   Widget _Home(BuildContext context) {
     return Card(
       child: ListTile(
@@ -102,6 +108,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     );
   }
 
+  /// Settings Drawer.
   Widget _Settings(BuildContext context) {
     return Card(
       child: ListTile(
@@ -118,7 +125,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     );
   }
 
-  Widget _adsContainer(BuildContext context) {
+  /* Widget _adsContainer(BuildContext context) {
     if (1 == 2) {
       return Card(
         child: SizedBox(height: 100, width: 378, child: Container()),
@@ -127,4 +134,5 @@ class _DrawerWidgetState extends State<DrawerWidget> {
       return Container();
     }
   }
+  */
 }

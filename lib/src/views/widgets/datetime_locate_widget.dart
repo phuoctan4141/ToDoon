@@ -4,6 +4,10 @@ import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
+/// DateTime Locate Task Widget.
+/// This widget is used to display the date and time of the task.
+/// The date and time are displayed according to the current location.
+/// The date and time are displayed in the format of the current location.
 class DateTimeLocateWidget extends StatelessWidget {
   String dateString;
   String reminderString;
@@ -22,6 +26,7 @@ class DateTimeLocateWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        /// Due Date Task.
         Row(
           children: [
             Icon(
@@ -35,6 +40,8 @@ class DateTimeLocateWidget extends StatelessWidget {
             ),
           ],
         ),
+
+        /// Reminder Task.
         Row(
           children: [
             Icon(ToDoonIcons.reminder,
@@ -50,7 +57,9 @@ class DateTimeLocateWidget extends StatelessWidget {
     );
   }
 
-  // format datetime by current location
+  /// Convert date and time to string.
+  /// @param [String] formattedString.
+  /// @return [String] object.
   String DateTimetoString(String? formattedString) {
     return DataController.instance.Iso8601toString(formattedString);
   }

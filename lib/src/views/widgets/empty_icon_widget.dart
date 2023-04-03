@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
+/// Empty Icon Widget.
 class EmptyIconWidget extends StatelessWidget {
   const EmptyIconWidget({super.key});
 

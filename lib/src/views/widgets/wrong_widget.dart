@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/themes/todoon_icons.dart';
 
+/// Wrong Widget.
 void wrongWidget(BuildContext context) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     // ignore: unnecessary_string_interpolations

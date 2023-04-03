@@ -5,7 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'package:todoon/src/constants/language.dart';
-import 'package:todoon/src/constants/states.dart';
 import 'package:todoon/src/constants/strings.dart';
 import 'package:todoon/src/controllers/data/data_controller.dart';
 import 'package:todoon/src/controllers/notifications/notifications_controller.dart';
@@ -24,9 +23,6 @@ class ToDoon extends StatefulWidget {
 }
 
 class _ToDoonState extends State<ToDoon> with WidgetsBindingObserver {
-  get currentContext => ToDoon.navigatorKey.currentContext;
-  get currentState => ToDoon.navigatorKey.currentState;
-
   @override
   void initState() {
     super.initState();

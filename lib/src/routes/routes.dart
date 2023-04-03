@@ -11,12 +11,18 @@ const String PAGE_TASK = '/task';
 const String PAGE_SETTINGS = '/settings';
 
 Map<String, WidgetBuilder> materialRoutes = {
+  // route IntroPage.dart.
   PAGE_INTRO: (context) => const IntroPage(),
+  // route PlansPage.dart.
   PAGE_HOME: (context) => PlansPage(),
+  // route SettingsPage.dart.
   PAGE_SETTINGS: (context) => const SettingsPage(),
+  // route TasksPage.dart.
   PAGE_PLAN: (context) =>
       TasksPage(plan: ModalRoute.of(context)!.settings.arguments as Plan),
+  // route PlansTodayPage.dart.
   PAGE_PLANS_TODAY: (context) => const PlansTodayPage(),
+  // route TaskEditPage.dart.
   PAGE_TASK: (context) {
     final TaskPageArguments args =
         ModalRoute.of(context)!.settings.arguments as TaskPageArguments;
@@ -24,6 +30,7 @@ Map<String, WidgetBuilder> materialRoutes = {
   },
 };
 
+/// Arguments for [TaskEditPage].
 class TaskPageArguments {
   final Plan plan;
   final Task task;

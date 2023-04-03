@@ -29,7 +29,7 @@ class SwitchWidget extends StatefulWidget {
     this.width = 70.0,
     this.height = 70.0,
     this.switchRollSize = 25.0,
-    this.duration = const Duration(milliseconds: 250),
+    this.duration = const Duration(milliseconds: 200),
     required this.onChanged,
   }) : super(key: key);
 
@@ -40,7 +40,7 @@ class SwitchWidget extends StatefulWidget {
 class _SwitchWidgetState extends State<SwitchWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation _circleAnimation;
+  late Animation<AlignmentGeometry> _alignAnimation;
 
   @override
   void initState() {
@@ -53,10 +53,10 @@ class _SwitchWidgetState extends State<SwitchWidget>
         value: widget.value ? 1.0 : 0.0,
         duration: widget.duration);
 
-    _circleAnimation =
-        AlignmentTween(begin: Alignment.centerLeft, end: Alignment.centerRight)
-            .animate(CurvedAnimation(
-                parent: _animationController, curve: Curves.easeInOut));
+    _alignAnimation = Tween<AlignmentGeometry>(
+            begin: Alignment.centerLeft, end: Alignment.centerRight)
+        .animate(CurvedAnimation(
+            parent: _animationController, curve: Curves.easeInOut));
   }
 
   @override
@@ -98,9 +98,10 @@ class _SwitchWidgetState extends State<SwitchWidget>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      // Switch Title.
+                      /// Switch Title.
                       _switchTitle(context),
-                      //Switch Button.
+
+                      /// Switch Button.
                       _switchButton(context),
                     ],
                   ),
@@ -109,6 +110,7 @@ class _SwitchWidgetState extends State<SwitchWidget>
         });
   }
 
+  /// Switch title.
   Widget _switchTitle(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -121,6 +123,7 @@ class _SwitchWidgetState extends State<SwitchWidget>
     );
   }
 
+  /// Switch button.
   Widget _switchButton(BuildContext context) {
     return Container(
       // Distance between [_switchButton] and [_switchTitle].
@@ -138,16 +141,18 @@ class _SwitchWidgetState extends State<SwitchWidget>
           ),
         ],
       ),
-      // ignore: prefer_const_constructors
+
+      /// Switch button.
       child: Padding(
+        // Position between text and toggle.
         padding:
             const EdgeInsets.only(top: 4.0, bottom: 4.0, right: 4.0, left: 4.0),
-        // Position between text and toggle.
+        // Switch button.
         child: Stack(
           children: [
             // Active switch.
             _activeSwitch(context),
-            // Switch button.
+            // Switch Roll.
             _switchRoll(context),
             // Inactive switch.
             _inactiveSwitch(context),
@@ -157,78 +162,66 @@ class _SwitchWidgetState extends State<SwitchWidget>
     );
   }
 
+  /// Active switch.
   Widget _activeSwitch(BuildContext context) {
-    return (_circleAnimation.value == Alignment.centerRight)
-        ? AnimatedOpacity(
-            opacity: widget.value ? 1.0 : 0.0,
-            duration: widget.duration,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                widget.activeText,
-                // ignore: prefer_const_constructors
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                    color: Themes.instance.switchActiveItemColor),
-              ),
-            ),
-          )
-        : Container();
-  }
-
-  Widget _switchRoll(BuildContext context) {
-    return Align(
-      alignment: _circleAnimation.value,
-      child: AnimatedOpacity(
-        duration: widget.duration,
-        opacity: 0.8,
-        child: Container(
-          width: widget.switchRollSize,
-          height: widget.switchRollSize,
-          decoration:
-              // ignore: prefer_const_constructors
-              BoxDecoration(
-            borderRadius: Themes.instance.switchRollBorder,
-            color: Themes.instance.switchRollItemColor,
-          ),
-          child: widget.value
-              ? Icon(widget.activeIcon ?? Icons.done_sharp)
-              : Icon(widget.inativeIcon ?? Icons.clear_sharp),
+    return AnimatedOpacity(
+      opacity: widget.value ? 1.0 : 0.0,
+      duration: widget.duration,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        alignment: Alignment.centerLeft,
+        child: Text(
+          widget.activeText,
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+              color: Themes.instance.switchActiveItemColor),
         ),
       ),
     );
   }
 
-  Widget _inactiveSwitch(BuildContext context) {
-    return _circleAnimation.value == Alignment.centerLeft
-        ? AnimatedOpacity(
-            opacity: widget.value ? 0.0 : 1.0,
-            duration: widget.duration,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              alignment: Alignment.centerRight,
-              child: Text(
-                widget.inactiveText,
-                // ignore: prefer_const_constructors
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                    color: Themes.instance.RadioSelectedColor),
-              ),
-            ),
-          )
-        : Container();
+  /// Switch Roll.
+  Widget _switchRoll(BuildContext context) {
+    return AlignTransition(
+      alignment: _alignAnimation,
+      child: Container(
+        width: widget.switchRollSize,
+        height: widget.switchRollSize,
+        decoration: BoxDecoration(
+          borderRadius: Themes.instance.switchRollBorder,
+          color: Themes.instance.switchRollItemColor,
+        ),
+        // Switch Roll Icon.
+        child: widget.value
+            ? Icon(widget.activeIcon ?? Icons.done_sharp)
+            : Icon(widget.inativeIcon ?? Icons.clear_sharp),
+      ),
+    );
   }
 
-  void _setSwitchState(BuildContext context) {
-    if (_animationController.isCompleted) {
-      _animationController.reverse();
-    } else {
-      _animationController.forward();
-    }
+  /// Inactive switch.
+  Widget _inactiveSwitch(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: widget.value ? 0.0 : 1.0,
+      duration: widget.duration,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        alignment: Alignment.centerRight,
+        child: Text(
+          widget.inactiveText,
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+              color: Themes.instance.RadioSelectedColor),
+        ),
+      ),
+    );
+  }
 
+  /// Set switch state.
+  void _setSwitchState(BuildContext context) {
+    // set value.
     setState(() {
       widget.value == false ? widget.onChanged(true) : widget.onChanged(false);
     });

@@ -150,11 +150,13 @@ class Language extends Strings with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Currently locale language.
   LocaleType get getLocaleType {
     return LocaleType.values
         .firstWhere((element) => element.name == current.locate);
   }
 
+  /// Currently labels for notification.
   Map<String, String> get getNoticeLabel {
     late Locale _deviceLocale = window.locale;
     late String _completeLabel = Language.instance.Complete;

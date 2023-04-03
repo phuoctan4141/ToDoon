@@ -9,15 +9,19 @@ enum TaskState { not, com, dead }
 /// [Handle] and [Repository] Data.
 class DataModel implements PlanModel, TasksModel {
   /// PLan list storage.
+  /// This is the only place where the data is stored.
   late PlansList _storage = PlansList(plans: []);
 
   /// Plan list cache.
+  /// This is the data that is displayed in the UI.
   late PlansList _inMemoryCache = PlansList(plans: []);
 
   /// Get [unmodifiable] data for the _storage.
+  /// @return [List<Plan>] object
   get getDataStorage => List.unmodifiable(_storage.plans);
 
   /// Set [unmodifiable] data to the _storage.
+  /// @param [PlansList] plansList.
   void setStorage(PlansList plansList) {
     _storage = PlansList(plans: List.unmodifiable(plansList.plans));
   }
@@ -27,18 +31,21 @@ class DataModel implements PlanModel, TasksModel {
   // _inMemoryCache /////////////
   ///////////////////////////////
 
-  /// Get Plans List for the _inMemoryCache.
+  /// Get [PlansList] for the _inMemoryCache.
+  /// @return [PlansList] object.
   PlansList get getPlansList {
     final plansList = PlansList(plans: List.unmodifiable(_inMemoryCache.plans));
     return plansList;
   }
 
-  /// Set Plans List to the _inMemoryCache.
+  /// Set [PlansList] to the _inMemoryCache.
+  /// @param [PlansList] plansList.
   void setMemoryCache(PlansList plansList) {
     _inMemoryCache = plansList;
   }
 
-  /// Get Tasks List for the _inMemoryCache.
+  /// Get [TasksList] for the _inMemoryCache.
+  /// @return [TasksList] object.
   TasksList getTasksList(Plan plan) {
     final index = indexPlan(plan);
     if (index == -1) return TasksList(tasks: []);
@@ -49,7 +56,8 @@ class DataModel implements PlanModel, TasksModel {
     return tasksList;
   }
 
-  /// Not complete tasksList.
+  /// Get [notcompleteTask] for the _inMemoryCache.
+  /// @return [TasksList] object.
   TasksList notTasksList(TasksList taskList) {
     final notTasks = taskList.tasks.where((element) {
       final now = DateTime.now();
@@ -64,7 +72,8 @@ class DataModel implements PlanModel, TasksModel {
     return _tasksList;
   }
 
-  /// Complete tasksList.
+  /// Get [completeTask] for the _inMemoryCache.
+  /// @return [TasksList] object.
   TasksList comTasksList(TasksList taskList) {
     final comTasks =
         taskList.tasks.where((element) => element.complete == true).toList();
@@ -73,7 +82,8 @@ class DataModel implements PlanModel, TasksModel {
     return _tasksList;
   }
 
-  /// Deadline tasksList.
+  /// Get [deadTask] for the _inMemoryCache.
+  /// @return [TasksList] object.
   TasksList deadTasksList(TasksList taskList) {
     final comTasks = taskList.tasks.where((element) {
       final now = DateTime.now();
@@ -85,7 +95,8 @@ class DataModel implements PlanModel, TasksModel {
     return _tasksList;
   }
 
-  /// PLansList Today.
+  /// Get [taskToday] for the _inMemoryCache.
+  /// @return [PlansList] object.
   PlansList get plansListToday {
     final plansToday = getPlansList.plans.where((element) {
       final tasksList = tasksListToday(element.tasks);
@@ -98,13 +109,15 @@ class DataModel implements PlanModel, TasksModel {
     return _plansList;
   }
 
-  /// TasksList Today
+  /// Get [taskToday] for the _inMemoryCache.
+  /// @return [TasksList] object.
   TasksList tasksListToday(List<Task> tasks) {
     final tasksList = TasksList(tasks: getTasksToday(tasks) ?? []);
     return tasksList;
   }
 
-  /// tasks Today.
+  /// Get [taskToday] for the _inMemoryCache.
+  /// @return [List<Task>] object.
   List<Task>? getTasksToday(List<Task> tasks) {
     final tasksToday = tasks.where((element) {
       final now = DateTime.now();
@@ -128,6 +141,7 @@ class DataModel implements PlanModel, TasksModel {
   //////////////////////////////
 
   /// Create a plan with ID [Unique].
+  /// @param [String] name.
   @override
   void createPlan({required String name}) {
     // Create Unique ID.
@@ -139,12 +153,15 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Get all plan from _inMemoryCache.
+  /// @return [List<Plan>] object.
   @override
   List<Plan> get getAllPlans {
     return List.unmodifiable(_inMemoryCache.plans);
   }
 
   /// Get a pLan where ID is.
+  /// @param [int] id.
+  /// @return [Plan] object.
   @override
   Plan? getPlan(int id) {
     final plans = List.unmodifiable(_inMemoryCache.plans);
@@ -156,6 +173,7 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Add a plan to the _storage.
+  /// @param [Plan] plan.
   @override
   void addPlan(Plan plan) {
     // Add plan to _inMemoryCache;
@@ -165,6 +183,7 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Update a plan to the _storage.
+  /// @param [Plan] plan.
   @override
   void updatePlan(Plan plan) {
     final _indexPlan = indexPlan(plan);
@@ -176,6 +195,7 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Delete a plan to the _storage.
+  /// @param [Plan] plan.
   @override
   void deletePlan(Plan plan) {
     final _indexPlan = indexPlan(plan);
@@ -187,6 +207,7 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Find an [index] plan for the _inMemoryCache.
+  /// @param [Plan] plan.
   @override
   int indexPlan(Plan plan) {
     final plans = List.unmodifiable(_inMemoryCache.plans);
@@ -199,6 +220,13 @@ class DataModel implements PlanModel, TasksModel {
   //////////////////////////////
 
   /// Create a [task] to [plan] with ID [Unique].
+  /// @param [Plan] plan.
+  /// @param [Task] task.
+  /// @param [String] description.
+  /// @param [String] date.
+  /// @param [String] reminder.
+  /// @param [bool] complete.
+  /// @param [bool] alert.
   @override
   void createTask(Plan plan,
       {String description = '',
@@ -220,6 +248,7 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Get [Tasks] for the plan.
+  /// @param [Plan] plan.
   @override
   List<Task> getAllTask(Plan plan) {
     final index = indexPlan(plan);
@@ -231,6 +260,8 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Get a task for the plan where ID is.
+  /// @param [Plan] plan.
+  /// @param [int] id.
   @override
   Task? getTask(Plan plan, int id) {
     final _indexPLan = indexPlan(plan);
@@ -249,6 +280,8 @@ class DataModel implements PlanModel, TasksModel {
     return null;
   }
 
+  /// Get a last task for the plan.
+  /// @param [Plan] plan.
   @override
   Task? getLastTask(Plan plan) {
     final _indexPLan = indexPlan(plan);
@@ -259,6 +292,8 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Add a task to the plan.
+  /// @param [Plan] plan.
+  /// @param [Task] task.
   @override
   void addTask(Plan plan, Task task) {
     final _indexPlan = indexPlan(plan);
@@ -271,6 +306,8 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Delete a task to the plan.
+  /// @param [Plan] plan.
+  /// @param [Task] task.
   @override
   void deleteTask(Plan plan, Task task) {
     final _indexPLan = indexPlan(plan);
@@ -284,6 +321,8 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Update a task for the plan.
+  /// @param [Plan] plan.
+  /// @param [Task] task.
   @override
   int updateTask(Plan plan, Task task) {
     final _indexPLan = indexPlan(plan);
@@ -310,6 +349,7 @@ class DataModel implements PlanModel, TasksModel {
   }
 
   /// Find an [index] task for the plan.
+  /// @param [Plan] plan.
   @override
   int indexTask(Plan plan, Task task) {
     final _indexPLan = indexPlan(plan);
@@ -353,7 +393,10 @@ abstract class TasksModel {
   int indexTask(Plan plan, Task task);
 }
 
-/// Check for duplicates and return string.
+/// Check for duplicates in the list.
+/// @param [Iterable<String>] items.
+/// @param [String] text.
+/// @return [String] object.
 String checkForDuplicates(Iterable<String> items, String text) {
   final duplicatedCount = items.where((item) => item.contains(text)).length;
   if (duplicatedCount > 0) {

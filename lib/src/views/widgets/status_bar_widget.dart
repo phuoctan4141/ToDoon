@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/models/plan/plan_export.dart';
 
+/// Status Bar Widget.
 class StatusBarWidget extends StatefulWidget {
   double width;
   double height;
@@ -106,7 +107,6 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
   @override
   void didUpdateWidget(StatusBarWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.deadTasksList.tasks.isNotEmpty) {
       _animationDead.reset();
       _animationDead.forward();
@@ -153,7 +153,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
               child: Flex(
                 direction: Axis.horizontal,
                 children: <Widget>[
-                  //Dead.
+                  /// Dead Tasks.
                   Expanded(
                     flex: (_tweenDead.value * deadLength).toInt(),
                     child: Stack(
@@ -167,7 +167,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
                       ],
                     ),
                   ),
-                  //Not.
+
+                  /// Not Complete Tasks.
                   Expanded(
                     flex: (_tweenNot.value * notLength).toInt(),
                     child: Stack(
@@ -181,7 +182,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget>
                       ],
                     ),
                   ),
-                  //Com.
+
+                  /// Complete Tasks.
                   Expanded(
                     flex: (_tweenAnimation.value * comLength).toInt(),
                     child: Stack(

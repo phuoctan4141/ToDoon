@@ -4,10 +4,12 @@ import 'dart:io';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/themes/todoon_icons.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 
+/// Allow Notifications Widget.
 Future<bool> AllowNoticesWidget(BuildContext context) async {
   if (Platform.isAndroid) {
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
@@ -21,6 +23,7 @@ Future<bool> AllowNoticesWidget(BuildContext context) async {
                 const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
             actionsAlignment: MainAxisAlignment.center,
             actions: [
+              /// Dont Allow Button (Cancel).
               ConstrainedBox(
                 constraints: const BoxConstraints(
                   minWidth: 120,
@@ -33,6 +36,8 @@ Future<bool> AllowNoticesWidget(BuildContext context) async {
                   label: Text(Language.instance.Dont_Allow),
                 ),
               ),
+
+              /// Allow Button (Confirm).
               ConstrainedBox(
                 constraints: const BoxConstraints(
                   minWidth: 120,
@@ -54,6 +59,7 @@ Future<bool> AllowNoticesWidget(BuildContext context) async {
       }
     });
 
+    /// Return true if notification is allowed.
     return await AwesomeNotifications().isNotificationAllowed();
   } else {
     return false;

@@ -40,7 +40,7 @@ class Themes with ChangeNotifier {
     notifyListeners();
   }
 
-  /// check and update isLightMode.
+  /// Check and update isLightMode by [SystemTheme].
   Future<void> updateTheme() async {
     if (current == ThemeMode.light) {
       isLightMode = true;
@@ -56,7 +56,7 @@ class Themes with ChangeNotifier {
     notifyListeners();
   }
 
-  /// check and update isLightMode.
+  /// Check and update [color] by [ColorMode].
   // ignore: no_leading_underscores_for_local_identifiers
   Future<void> updateColor() async {
     if (color.index == 0) {

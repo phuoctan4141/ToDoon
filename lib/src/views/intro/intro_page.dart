@@ -9,6 +9,10 @@ import 'package:todoon/src/controllers/settings/settings_controller.dart';
 import 'package:todoon/src/controllers/settings/themes.dart';
 import 'package:todoon/src/routes/routes_export.dart';
 
+/// Intro Page.
+/// This is the first page that the user sees when he opens the application.
+/// It is used to introduce the application and its features.
+/// It is also used to set the application [language] and [theme].
 class IntroPage extends StatefulWidget {
   static const routeName = PAGE_INTRO;
   const IntroPage({super.key});
@@ -87,6 +91,8 @@ class _IntroPageState extends State<IntroPage> {
     );
   }
 
+  /// This is [firstpage] of the introduction.
+  /// It is used to introduce the application and its features.
   PageViewModel get firstpage => PageViewModel(
       title: Language.instance.Welcome_Title,
       body: Language.instance.Welcome_Content,
@@ -101,6 +107,8 @@ class _IntroPageState extends State<IntroPage> {
         ),
       ));
 
+  /// This is [thirdPage] of the introduction.
+  /// It is used to set the application [theme].
   PageViewModel get secondPage {
     // Currently, Language.
     late LanguageData current = context.watch<Language>().current;
@@ -154,6 +162,8 @@ class _IntroPageState extends State<IntroPage> {
         ));
   }
 
+  /// This is [thirdPage] of the introduction.
+  /// It is used to set the application [theme].
   PageViewModel get thirdPage {
     // Currently, Color Mode.
     late ThemeMode current = settingsController.themeMode;
@@ -209,7 +219,7 @@ class _IntroPageState extends State<IntroPage> {
         ));
   }
 
-  // Set the color mode title.
+  /// Set the color mode title.
   String colorModeTitle(BuildContext context, int index) {
     if (index == 1) {
       return Language.instance.Setting_Bleed_Title;

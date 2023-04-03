@@ -18,6 +18,7 @@ class ToDoonIcons {
   static const IconData settings = Icons.settings;
   static const IconData drawer = Icons.menu;
   static const IconData back = Icons.arrow_back;
+  static const IconData done = Icons.done_all_rounded;
   static const IconData add_plan = Icons.format_list_bulleted_add;
   static const IconData add_task = Icons.add_task;
   static const IconData edit = Icons.mode_edit_rounded;

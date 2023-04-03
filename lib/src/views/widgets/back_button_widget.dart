@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:todoon/src/constants/language.dart';
 import 'package:todoon/src/constants/themes/todoon_icons.dart';
 
+/// Back Button Widget.
 class BackButtonWidget extends StatelessWidget {
   const BackButtonWidget({super.key});
 
