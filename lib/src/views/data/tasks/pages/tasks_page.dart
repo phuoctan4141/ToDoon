@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, no_leading_underscores_for_local_identifiers
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -134,43 +136,68 @@ class _TasksPageState extends State<TasksPage> {
         DataController.instance.getDeadlineTasksList(tasksList);
     final width = MediaQuery.of(context).size.width;
 
-    return SingleChildScrollView(
+    return CustomScrollView(
       controller: scrollController,
-      child: Column(
-        children: <Widget>[
-          // Status bar.
-          StatusBarWidget(
-              width: width - 16,
-              height: 30,
-              deadTasksList: deadTasksList,
-              notTasksList: notTasksList,
-              comTasksList: comTasksList),
-          // Deadline tasksList.
-          ListView.builder(
-            clipBehavior: Clip.antiAlias,
-            shrinkWrap: true,
-            itemCount: deadTasksList.tasks.length,
-            itemBuilder: (context, indexTask) =>
-                _buildTaskTile(context, deadTasksList.tasks, indexTask),
+      slivers: <Widget>[
+        /// Status bar.
+        SliverAppBar(
+          pinned: true,
+          snap: true,
+          stretch: true,
+          floating: true,
+          automaticallyImplyLeading: false,
+          toolbarHeight: 60,
+          elevation: 6.0,
+          backgroundColor:
+              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
+          flexibleSpace: FlexibleSpaceBar(
+            centerTitle: true,
+            expandedTitleScale: 1.0,
+            title: StatusBarWidget(
+                width: width - 16,
+                height: 30,
+                deadTasksList: deadTasksList,
+                notTasksList: notTasksList,
+                comTasksList: comTasksList),
+            background: Material(
+              color: Colors.transparent,
+              child: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 7, sigmaY: 3),
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              ),
+            ),
           ),
-          // Not complete tasks.
-          ListView.builder(
-            clipBehavior: Clip.antiAlias,
-            shrinkWrap: true,
-            itemCount: notTasksList.tasks.length,
-            itemBuilder: (context, indexTask) =>
-                _buildTaskTile(context, notTasksList.tasks, indexTask),
-          ),
-          // Complete task.
-          ListView.builder(
-            clipBehavior: Clip.antiAlias,
-            shrinkWrap: true,
-            itemCount: comTasksList.tasks.length,
-            itemBuilder: (context, indexTask) =>
-                _buildTaskTile(context, comTasksList.tasks, indexTask),
-          ),
-        ],
-      ),
+        ),
+
+        /// Deadline tasksList.
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+              childCount: deadTasksList.tasks.length, (context, indexTask) {
+            return _buildTaskTile(context, deadTasksList.tasks, indexTask);
+          }),
+        ),
+
+        /// Not complete tasks.
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+              childCount: notTasksList.tasks.length, (context, indexTask) {
+            return _buildTaskTile(context, notTasksList.tasks, indexTask);
+          }),
+        ),
+
+        /// Complete task
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+              childCount: comTasksList.tasks.length, (context, indexTask) {
+            return _buildTaskTile(context, comTasksList.tasks, indexTask);
+          }),
+        ),
+        // Complete task.
+      ],
     );
   }
 
