@@ -38,18 +38,33 @@ class ToDoonIcons {
   static const IconData reminder = Icons.alarm_sharp;
   static const IconData add_reminder = Icons.alarm_add_sharp;
 
+  // Alert icons for application (on and off).
   static IconData getAlertState(bool alert) =>
       alert ? Icons.alarm_on_sharp : Icons.alarm_off_sharp;
 
+  // Theme icons for application (light and dark mode).
+  static const ValueKey<String> light_mode_key = ValueKey('light_mode');
+  static const ValueKey<String> dark_mode_key = ValueKey('dark_mode');
   static Icon getThemeState(bool isLight) => isLight
-      ? const Icon(Icons.light_mode_rounded, color: Colors.amberAccent)
-      : const Icon(Icons.dark_mode_rounded, color: Colors.blueAccent);
+      ? const Icon(Icons.light_mode_rounded,
+          color: Colors.amberAccent, key: light_mode_key)
+      : const Icon(Icons.dark_mode_rounded,
+          color: Colors.blueAccent, key: dark_mode_key);
 
+  // Language icons for application (English and Vietnamese).
+  static const ValueKey<String> english_key = ValueKey('english');
+  static const ValueKey<String> vietnamese_key = ValueKey('vietnamese');
   static Icon getLanguageState(String language) => language == 'vi'
-      ? const Icon(Icons.star_rounded, color: Colors.amberAccent)
-      : const Icon(Icons.public_rounded, color: Colors.blueAccent);
+      ? const Icon(Icons.star_rounded,
+          color: Colors.amberAccent, key: vietnamese_key)
+      : const Icon(Icons.public_rounded,
+          color: Colors.blueAccent, key: english_key);
 
+  // Color icons for application (Azure and Pink).
+  static const ValueKey<String> azure_key = ValueKey('azure');
+  static const ValueKey<String> bleed_key = ValueKey('bleed');
   static Icon getColorState(ColorMode colorMode) => colorMode == ColorMode.azure
-      ? const Icon(Icons.local_florist_rounded, color: Colors.blueAccent)
-      : const Icon(Icons.spa_rounded, color: Colors.pinkAccent);
+      ? const Icon(Icons.local_florist_rounded,
+          color: Colors.blueAccent, key: azure_key)
+      : const Icon(Icons.spa_rounded, color: Colors.pinkAccent, key: bleed_key);
 }

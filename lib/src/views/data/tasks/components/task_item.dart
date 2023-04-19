@@ -52,8 +52,10 @@ class TaskItem extends StatelessWidget {
             // Position TextFormField compared to [title].
             margin: const EdgeInsets.only(top: 5),
             decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(width: 1.0),
+              border: Border.all(
+                  width: 1.0, color: Theme.of(context).colorScheme.outline),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

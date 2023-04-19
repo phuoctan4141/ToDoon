@@ -20,11 +20,17 @@ class EditPlan extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      insetPadding: const EdgeInsets.all(8.0),
+      actionsPadding:
+          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
+      actionsOverflowAlignment: OverflowBarAlignment.end,
+      actionsAlignment: MainAxisAlignment.center,
       title: Text(Language.instance.Edit_Plan),
       content: TextField(
         minLines: 1,
         maxLength: 128,
         controller: controller,
+        autofocus: true,
         onEditingComplete: () => FocusScope.of(context).nextFocus(),
         decoration: InputDecoration(
           label: Text(Language.instance.Name_Plan),
@@ -32,10 +38,6 @@ class EditPlan extends StatelessWidget {
           border: const OutlineInputBorder(),
         ),
       ),
-      actionsPadding:
-          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
-      actionsOverflowAlignment: OverflowBarAlignment.end,
-      actionsAlignment: MainAxisAlignment.center,
       actions: <Widget>[
         ConstrainedBox(
           constraints: const BoxConstraints(

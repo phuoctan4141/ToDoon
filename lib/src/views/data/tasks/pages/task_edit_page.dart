@@ -38,8 +38,8 @@ class TaskEditPage extends StatefulWidget {
 }
 
 class _TaskEditPageState extends State<TaskEditPage> {
-  late Plan plan;
-  late Task task;
+  Plan? plan;
+  Task? task;
   late DataController dataController;
 
   late ScrollController scrollController;
@@ -47,9 +47,9 @@ class _TaskEditPageState extends State<TaskEditPage> {
 
   late TextEditingController textEditingDecription;
   late TextEditingController textEditingDate;
-  late TextEditingController textEditingReminder;
-  late bool _complete = false;
-  late bool _alert = false;
+  TextEditingController? textEditingReminder;
+  bool? _complete = false;
+  bool? _alert = false;
   DateTime? _dateTime;
 
   double? height;
@@ -66,32 +66,40 @@ class _TaskEditPageState extends State<TaskEditPage> {
     textEditingReminder = TextEditingController();
 
     dataController = Provider.of<DataController>(context, listen: false);
-    plan = dataController.getPlanById(widget.plan.id)!;
-    task = dataController.getTaskById(plan, widget.task.id)!;
+    plan = dataController.getPlanById(widget.plan.id);
+    task = dataController.getTaskById(plan!, widget.task.id);
 
-    textEditingDecription.text = task.description;
-    textEditingDate.text = DataController.instance.Iso8601toString(task.date);
-    textEditingReminder.text =
-        DataController.instance.Iso8601toString(task.reminder);
-    _complete = task.complete;
-    _alert = task.alert;
+    textEditingDecription.text = task!.description;
+    textEditingDate.text = DataController.instance.Iso8601toString(task!.date);
+    textEditingReminder!.text =
+        DataController.instance.Iso8601toString(task!.reminder);
+    _complete = task!.complete;
+    _alert = task!.alert;
   }
 
   @override
   void didChangeDependencies() {
-    final _dataController = Provider.of<DataController>(context, listen: true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      plan = _dataController.getPlanById(widget.plan.id)!;
-      task = _dataController.getTaskById(plan, widget.task.id)!;
-      if ((_alert == false) || (task.alert != _alert && _alert == true)) {
-        if (task.reminder == '(O.O)') {
-          textEditingReminder.text =
-              DataController.instance.Iso8601toString(task.reminder);
+    dataController.addListener(() {
+      plan = dataController.getPlanById(widget.plan.id);
+      if (plan == null) {
+        return;
+      }
+      task = dataController.getTaskById(plan!, widget.task.id);
+      if (task == null) {
+        return;
+      }
+
+      if ((_alert == false) || (task!.alert != _alert && _alert == true)) {
+        if (task?.reminder == '(O.O)') {
+          textEditingReminder?.text =
+              DataController.instance.Iso8601toString(task!.reminder);
         }
-        _complete = task.complete;
-        _alert = task.alert;
-        if (context.mounted) {
-          setState(() {});
+
+        if (mounted) {
+          setState(() {
+            _complete = task!.complete;
+            _alert = task!.alert;
+          });
         }
       }
     });
@@ -104,7 +112,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
     scrollController.dispose();
     textEditingDecription.dispose();
     textEditingDate.dispose();
-    textEditingReminder.dispose();
+    textEditingReminder?.dispose();
     super.dispose();
   }
 
@@ -118,7 +126,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
           appBar: AppBar(
             // ignore: prefer_const_constructors
             leading: BackButtonWidget(),
-            title: Text(plan.name.toString(),
+            title: Text(plan!.name.toString(),
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             // ignore: prefer_const_literals_to_create_immutables
             actions: [
@@ -141,12 +149,12 @@ class _TaskEditPageState extends State<TaskEditPage> {
   /////////////////////////////
 
   _buildDrawer(BuildContext context) {
-    final tasks = plan.tasks;
+    final tasks = plan!.tasks;
 
     return TasksDrawer(
-      plan: plan,
+      plan: plan!,
       tasks: tasks,
-      task: task,
+      task: task!,
       scrollController: scrollController,
     );
   }
@@ -268,7 +276,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
     return SwitchWidget(
         title: Text(Language.instance.Complete,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        value: _complete,
+        value: _complete!,
         activeText: Language.instance.Complete,
         inactiveText: Language.instance.Off,
         width: 135,
@@ -285,7 +293,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
     return SwitchWidget(
         title: Text(Language.instance.Alert,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        value: _alert,
+        value: _alert!,
         activeText: Language.instance.Alert,
         inactiveText: Language.instance.Off,
         width: 130,
@@ -378,14 +386,14 @@ class _TaskEditPageState extends State<TaskEditPage> {
         if (dateTime.isAfter(currentTime)) {
           // Get reminder.
           initializeDateFormatting(Language.instance.current.code, null);
-          textEditingReminder.text =
+          textEditingReminder!.text =
               DataController.instance.DateTimetoString(dateTime);
           _dateTime = dateTime;
           // Update alert.
           final done = await onUpdateAlert(context);
           if (context.mounted && done.compareTo(States.TRUE) == 0) {
-            NotificationsController.cancelScheduledNotificationsById(task.id);
-            NotificationsController.dismissNotificationsById(task.id);
+            NotificationsController.cancelScheduledNotificationsById(task!.id);
+            NotificationsController.dismissNotificationsById(task!.id);
             // Update _alert is false.
             setState(() {
               _alert = false;
@@ -408,7 +416,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
       onConfirm: (dateTime) async {
         if (dateTime.isAfter(currentTime)) {
           initializeDateFormatting(Language.instance.current.code, null);
-          textEditingReminder.text =
+          textEditingReminder!.text =
               DataController.instance.DateTimetoString(dateTime);
           _dateTime = dateTime;
         }
@@ -489,21 +497,21 @@ class _TaskEditPageState extends State<TaskEditPage> {
   Future<String> doUpdateTask(BuildContext context) async {
     final _description = textEditingDecription.text;
     final _date = dataController.StringtoIso8601(textEditingDate.text);
-    final _reminder = dataController.StringtoIso8601(textEditingReminder.text);
+    final _reminder = dataController.StringtoIso8601(textEditingReminder!.text);
 
     final _task = Task(
-        id: task.id,
+        id: task!.id,
         description: _description,
         date: _date,
         reminder: _reminder,
-        complete: _complete,
-        alert: task.alert);
+        complete: _complete!,
+        alert: task!.alert);
 
-    return await dataController.doEditTask(plan, _task);
+    return await dataController.doEditTask(plan!, _task);
   }
 
   Future<void> changeAlert(BuildContext context) async {
-    if (_alert) {
+    if (_alert!) {
       // Handle a notification.
       await showDialog(
           context: context,
@@ -519,7 +527,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
           });
     } else {
       // Cancel a notification.
-      NotificationsController.cancelScheduledNotificationsById(task.id);
+      NotificationsController.cancelScheduledNotificationsById(task!.id);
       //Update a task.
       final done = await onUpdateAlert(context);
       if (context.mounted && done.compareTo(States.TRUE) == 0) {
@@ -538,31 +546,37 @@ class _TaskEditPageState extends State<TaskEditPage> {
 
     if (context.mounted) {
       setState(() {
-        _alert = task.alert;
+        _alert = task!.alert;
       });
     }
   }
 
   Future<void> onNotice(BuildContext context) async {
     if (_dateTime != null) {
+      if (_dateTime!.isBefore(DateTime.now())) {
+        // Show snackbar.
+        wrongWidget(context);
+        return;
+      }
+
       final _description = textEditingDecription.text;
       final _date = dataController.StringtoIso8601(textEditingDate.text);
       final _reminder =
-          dataController.StringtoIso8601(textEditingReminder.text);
+          dataController.StringtoIso8601(textEditingReminder!.text);
 
       final _task = Task(
-          id: task.id,
+          id: task!.id,
           description: _description,
           date: _date,
           reminder: _reminder,
-          complete: _complete,
+          complete: _complete!,
           alert: true);
-      final done = await dataController.doEditTask(plan, _task);
+      final done = await dataController.doEditTask(plan!, _task);
 
       if (context.mounted && done.compareTo(States.TRUE) == 0) {
         // Create a notification.
         NotificationsController.createTaskReminderNotification(
-            plan, task, _dateTime!);
+            plan!, task!, _dateTime!);
         // Set _alert is true.
         Navigator.of(context).pop();
         setState(() {
@@ -599,7 +613,7 @@ class _TaskEditPageState extends State<TaskEditPage> {
 
   Future<void> onDeadlineNotice(BuildContext context) async {
     // Create notification.
-    final _task = dataController.getTaskById(widget.plan, task.id);
+    final _task = dataController.getTaskById(widget.plan, task!.id);
     final date = DataController.instance.Iso8601toDateTime(_task?.date);
     if (date != null && date.isAfter(DateTime.now())) {
       NotificationsController.createTaskDeadlineNotification(
@@ -613,13 +627,13 @@ class _TaskEditPageState extends State<TaskEditPage> {
     final _date = dataController.StringtoIso8601(textEditingDate.text);
 
     final _task = Task(
-        id: task.id,
+        id: task!.id,
         description: _description,
         date: _date,
-        reminder: task.reminder,
-        complete: _complete,
+        reminder: task!.reminder,
+        complete: _complete!,
         alert: false);
-    return await dataController.doEditTask(plan, _task);
+    return await dataController.doEditTask(plan!, _task);
   }
 
 //end code

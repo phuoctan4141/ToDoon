@@ -40,6 +40,7 @@ class PlansTodayContainer extends StatelessWidget {
         ),
         child: InkWell(
           onTap: onTap,
+          splashColor: Theme.of(context).indicatorColor,
           borderRadius: BorderRadius.circular(10),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -47,12 +48,16 @@ class PlansTodayContainer extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Lottie.asset(ToDoonIcons.today_lottie,
-                    width: 60.0, height: 60.0),
-                Text(
-                  context.watch<Language>().Focus_Content,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                SafeArea(
+                  child: Lottie.asset(ToDoonIcons.today_lottie,
+                      width: 60.0, height: 60.0),
+                ),
+                SafeArea(
+                  child: Text(
+                    context.watch<Language>().Focus_Content,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -69,6 +74,7 @@ class NoTasksToday extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 3.0,
       child: Container(
           alignment: Alignment.center,
           width: MediaQuery.of(context).size.width / 3,

@@ -94,7 +94,16 @@ class _SettingsPageState extends State<SettingsPage> {
     late ColorMode color = settingsController.colorMode;
 
     return SettingsSection(
-      icon: ToDoonIcons.getThemeState(Themes.instance.isLightMode),
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, anim) => RotationTransition(
+          turns: child.key == ToDoonIcons.light_mode_key
+              ? Tween<double>(begin: 1, end: 0.75).animate(anim)
+              : Tween<double>(begin: 0.75, end: 1).animate(anim),
+          child: FadeTransition(opacity: anim, child: child),
+        ),
+        child: ToDoonIcons.getThemeState(Themes.instance.isLightMode),
+      ),
       title: Language.instance.Setting_Theme_Title,
       children: themeList
           .map(
@@ -138,7 +147,13 @@ class _SettingsPageState extends State<SettingsPage> {
     late ColorMode color = settingsController.colorMode;
 
     return SettingsSection(
-      icon: ToDoonIcons.getColorState(color),
+      icon: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, anim) => FadeTransition(
+                opacity: CurvedAnimation(parent: anim, curve: Curves.easeIn),
+                child: ScaleTransition(scale: anim, child: child),
+              ),
+          child: ToDoonIcons.getColorState(color)),
       title: Language.instance.Setting_Colors_Title,
       children: colorList
           .map(
@@ -178,7 +193,22 @@ class _SettingsPageState extends State<SettingsPage> {
     late LanguageData current = context.watch<Language>().current;
 
     return SettingsSection(
-      icon: ToDoonIcons.getLanguageState(current.locate),
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, anim) => SlideTransition(
+          position: child.key == ToDoonIcons.vietnamese_key
+              ? Tween<Offset>(
+                      begin: const Offset(0.0, -0.5),
+                      end: const Offset(0.0, 0.0))
+                  .animate(anim)
+              : Tween<Offset>(
+                      begin: const Offset(0.0, 0.5),
+                      end: const Offset(0.0, 0.0))
+                  .animate(anim),
+          child: ScaleTransition(scale: anim, child: child),
+        ),
+        child: ToDoonIcons.getLanguageState(current.locate),
+      ),
       title: Language.instance.Setting_Language_Title,
       children: available
           .map((data) => RadioListTile<LanguageData>(

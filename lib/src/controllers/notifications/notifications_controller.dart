@@ -161,7 +161,7 @@ class NotificationsController {
   }
 
   /// Create a task reminder notice.
-  static Future<void> createTaskReminderNotification(
+  static Future<String> createTaskReminderNotification(
       Plan plan, Task task, DateTime date) async {
     // Always ensure that all plugins was initialized.
     WidgetsFlutterBinding.ensureInitialized();
@@ -175,7 +175,7 @@ class NotificationsController {
     if (!isAllowed) {
       isAllowed = await AllowNoticesWidget(ToDoon.navigatorKey.currentContext!);
     }
-    if (!isAllowed) return;
+    if (!isAllowed) return States.FALSE;
 
     // Set a payload.
     Map<String, String> payload = {
@@ -212,6 +212,8 @@ class NotificationsController {
       ],
       schedule: NotificationCalendar.fromDate(date: date),
     );
+
+    return States.TRUE;
   }
 
   /// Create a task deadline notice.

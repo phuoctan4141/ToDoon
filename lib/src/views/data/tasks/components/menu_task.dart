@@ -8,7 +8,7 @@ import 'package:todoon/src/controllers/settings/themes.dart';
 // ignore: camel_case_types, constant_identifier_names
 enum onFunc { Edit, Delete }
 
-class MenuTask extends StatelessWidget {
+class MenuTask extends StatefulWidget {
   Widget? icon;
   bool complete;
   bool alert;
@@ -27,6 +27,48 @@ class MenuTask extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<MenuTask> createState() => _MenuTaskState();
+}
+
+class _MenuTaskState extends State<MenuTask>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _animation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant MenuTask oldWidget) {
+    if (oldWidget.alert != widget.alert) {
+      _animationController.reset();
+      _animationController.forward();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 4.0,
@@ -42,20 +84,30 @@ class MenuTask extends StatelessWidget {
   }
 
   _buildInkAlert(BuildContext context) {
-    return Material(
-      color: Themes.instance.AlertCompleteBolderColor(alert),
-      shadowColor: Themes.instance.AlertCompleteBolderColor(alert),
-      borderRadius: Themes.instance.switchRollBorder,
-      child: InkWell(
+    return FadeTransition(
+      opacity: _animation,
+      child: Material(
+        type: MaterialType.button,
+        elevation: 1.0,
+        color: Themes.instance.AlertCompleteBolderColor(widget.alert),
+        shadowColor: Themes.instance.AlertCompleteBolderColor(widget.alert),
         borderRadius: Themes.instance.switchRollBorder,
-        onTap: onAlert,
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: Icon(
-            ToDoonIcons.getAlertState(alert),
-            semanticLabel: Language.instance.Reminder,
-            color: Themes.instance.AlertCompleteColor(alert),
+        child: InkWell(
+          key: ValueKey(widget.alert),
+          splashColor: Theme.of(context).indicatorColor,
+          borderRadius: Themes.instance.switchRollBorder,
+          onTap: widget.onAlert,
+          child: ScaleTransition(
+            scale: _animation,
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Icon(
+                ToDoonIcons.getAlertState(widget.alert),
+                semanticLabel: Language.instance.Reminder,
+                color: Themes.instance.AlertCompleteColor(widget.alert),
+              ),
+            ),
           ),
         ),
       ),
@@ -64,9 +116,9 @@ class MenuTask extends StatelessWidget {
 
   _buildPopupMenuButton(BuildContext context) {
     return PopupMenuButton(
-      icon: icon ??
+      icon: widget.icon ??
           Icon(Icons.more_vert,
-              color: Themes.instance.TaskItemCompleteColor(complete)),
+              color: Themes.instance.TaskItemCompleteColor(widget.complete)),
       tooltip: Language.instance.Show_Menu,
       itemBuilder: (context) => <PopupMenuItem>[
         PopupMenuItem(
@@ -83,8 +135,8 @@ class MenuTask extends StatelessWidget {
             )),
       ],
       onSelected: (value) {
-        if (value == onFunc.Edit) onEdit.call();
-        if (value == onFunc.Delete) onDelete.call();
+        if (value == onFunc.Edit) widget.onEdit.call();
+        if (value == onFunc.Delete) widget.onDelete.call();
       },
     );
   }

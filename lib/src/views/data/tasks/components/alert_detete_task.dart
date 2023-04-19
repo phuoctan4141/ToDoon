@@ -11,6 +11,7 @@ class AlertDeleteTask extends StatelessWidget {
     return AlertDialog(
       title: Text(Language.instance.Delete_Task),
       content: Text(Language.instance.Delete_Sure),
+      insetPadding: const EdgeInsets.all(8.0),
       actionsPadding:
           const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
       actionsAlignment: MainAxisAlignment.center,

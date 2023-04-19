@@ -17,11 +17,12 @@ Future<bool> AllowNoticesWidget(BuildContext context) async {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(Language.instance.Allow_Notifications),
-            content: Text(Language.instance.Allow_Content),
+            insetPadding: const EdgeInsets.all(8.0),
             actionsPadding:
                 const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
             actionsAlignment: MainAxisAlignment.center,
+            title: Text(Language.instance.Allow_Notifications),
+            content: Text(Language.instance.Allow_Content),
             actions: [
               /// Dont Allow Button (Cancel).
               ConstrainedBox(

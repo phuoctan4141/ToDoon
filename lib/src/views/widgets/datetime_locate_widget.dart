@@ -27,31 +27,51 @@ class DateTimeLocateWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         /// Due Date Task.
-        Row(
-          children: [
-            Icon(
-              ToDoonIcons.dueDate,
-              color: Themes.instance.TaskItemCompleteColor(complete),
-            ),
-            Text(
-              DateTimetoString(dateString),
-              style: TextStyle(
-                  color: Themes.instance.TaskItemCompleteColor(complete)),
-            ),
-          ],
+        SafeArea(
+          child: Row(
+            children: [
+              SafeArea(
+                child: Icon(
+                  ToDoonIcons.dueDate,
+                  color: Themes.instance.TaskItemCompleteColor(complete),
+                ),
+              ),
+              const SizedBox(width: 3.0),
+              Expanded(
+                child: Text(
+                  DateTimetoString(dateString),
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Themes.instance.TaskItemCompleteColor(complete),
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ),
+            ],
+          ),
         ),
 
+        const SizedBox(width: 3.0),
+
         /// Reminder Task.
-        Row(
-          children: [
-            Icon(ToDoonIcons.reminder,
-                color: Themes.instance.TaskItemCompleteColor(complete)),
-            Text(
-              DateTimetoString(reminderString),
-              style: TextStyle(
-                  color: Themes.instance.TaskItemCompleteColor(complete)),
-            ),
-          ],
+        SafeArea(
+          child: Row(
+            children: [
+              SafeArea(
+                child: Icon(ToDoonIcons.reminder,
+                    color: Themes.instance.TaskItemCompleteColor(complete)),
+              ),
+              const SizedBox(width: 3.0),
+              Expanded(
+                child: Text(
+                  DateTimetoString(reminderString),
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Themes.instance.TaskItemCompleteColor(complete),
+                      overflow: TextOverflow.ellipsis),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

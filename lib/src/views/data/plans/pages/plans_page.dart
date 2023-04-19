@@ -73,8 +73,8 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
         plansListToday = dataController.getDataToday;
 
         dataController.addListener(() {
-          animationController!.reset();
-          animationController!.forward();
+          animationController?.reset();
+          animationController?.forward();
         });
 
         return Scaffold(
@@ -149,18 +149,23 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
   Widget _buildPlansTodayContainer(BuildContext context) {
     final plansToday = plansListToday.plans;
 
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        plansToday.isNotEmpty
-            ? PlansTodayContainer(
-                onTap: () => _routePlansToday(context),
-              )
-            : const NoTasksToday(),
-        //_adsContainer(context),
-        _doWorkContainer(context),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SafeArea(
+            child: plansToday.isNotEmpty
+                ? PlansTodayContainer(
+                    onTap: () => _routePlansToday(context),
+                  )
+                : const NoTasksToday(),
+          ),
+          //_adsContainer(context),
+          Expanded(child: _doWorkContainer(context)),
+        ],
+      ),
     );
   }
 
@@ -168,21 +173,18 @@ class _PlansPageState extends State<PlansPage> with TickerProviderStateMixin {
     return GestureDetector(
       onDoubleTap: () => Navigator.pushNamed(context, IntroPage.routeName),
       child: Card(
+        elevation: 3.0,
         child: Container(
+          alignment: Alignment.center,
           margin: const EdgeInsets.all(8.0),
           height: 120,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
           ),
-          width: (MediaQuery.of(context).size.width * (2 / 3) - 40),
-          child: Container(
-            alignment: Alignment.center,
-            height: 104,
-            width: (MediaQuery.of(context).size.width * (2 / 3) - 56),
-            child: Lottie.asset(
-              ToDoonIcons.do_work_lottie,
-              controller: animationController,
-            ),
+          width: (MediaQuery.of(context).size.width * (2 / 3)),
+          child: Lottie.asset(
+            ToDoonIcons.do_work_lottie,
+            controller: animationController,
           ),
         ),
       ),

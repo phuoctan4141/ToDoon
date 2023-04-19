@@ -22,10 +22,16 @@ class AddPLan extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      insetPadding: const EdgeInsets.all(8.0),
+      actionsPadding:
+          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
+      actionsOverflowAlignment: OverflowBarAlignment.end,
+      actionsAlignment: MainAxisAlignment.center,
       title: Text(Language.instance.Add_Plan),
       content: TextField(
         minLines: 1,
         maxLength: 128,
+        autofocus: true,
         controller: controller,
         onEditingComplete: () => FocusScope.of(context).nextFocus(),
         decoration: InputDecoration(
@@ -34,10 +40,6 @@ class AddPLan extends StatelessWidget {
           border: const OutlineInputBorder(),
         ),
       ),
-      actionsPadding:
-          const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
-      actionsOverflowAlignment: OverflowBarAlignment.end,
-      actionsAlignment: MainAxisAlignment.center,
       actions: <Widget>[
         ConstrainedBox(
           constraints: const BoxConstraints(

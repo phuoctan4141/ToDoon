@@ -140,32 +140,37 @@ class _TasksPageState extends State<TasksPage> {
       controller: scrollController,
       slivers: <Widget>[
         /// Status bar.
-        SliverAppBar(
-          pinned: true,
-          snap: true,
-          stretch: true,
-          floating: true,
-          automaticallyImplyLeading: false,
-          toolbarHeight: 60,
-          elevation: 6.0,
-          backgroundColor:
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
-          flexibleSpace: FlexibleSpaceBar(
-            centerTitle: true,
-            expandedTitleScale: 1.0,
-            title: StatusBarWidget(
-                width: width - 16,
-                height: 30,
-                deadTasksList: deadTasksList,
-                notTasksList: notTasksList,
-                comTasksList: comTasksList),
-            background: Material(
-              color: Colors.transparent,
-              child: ClipRRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 7, sigmaY: 3),
-                  child: Container(
-                    color: Colors.transparent,
+        SliverPadding(
+          padding: const EdgeInsets.only(bottom: 5.0),
+          sliver: SliverAppBar(
+            primary: false,
+            pinned: true,
+            snap: true,
+            stretch: true,
+            floating: true,
+            automaticallyImplyLeading: false,
+            toolbarHeight: 60,
+            elevation: 6.0,
+            backgroundColor:
+                Theme.of(context).scaffoldBackgroundColor.withOpacity(0.1),
+            flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
+              expandedTitleScale: 1.0,
+              title: StatusBarWidget(
+                  width: width - 16,
+                  height: 30,
+                  deadTasksList: deadTasksList,
+                  notTasksList: notTasksList,
+                  comTasksList: comTasksList),
+              background: Material(
+                color: Colors.transparent,
+                child: ClipRRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                        sigmaX: 70, sigmaY: 30, tileMode: TileMode.mirror),
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
                   ),
                 ),
               ),
@@ -375,6 +380,14 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Future<void> updateAlert(BuildContext context, Task task) async {
+    if (task.reminder.compareTo(States.NOTICE_NULL) != 0) {
+      setState(() {
+        _dateTime = DataController.instance.Iso8601toDateTime(task.reminder);
+        textEditingReminder.text =
+            DataController.instance.Iso8601toString(task.reminder);
+      });
+    }
+
     if (task.alert == false) {
       await showDialog(
           context: context,
@@ -407,26 +420,12 @@ class _TasksPageState extends State<TasksPage> {
     }
   }
 
-  Future<String> doUpdateAlert(BuildContext context, Task task,
-      {required String textReminder, required bool alert}) async {
-    //Update a task.
-    final _reminder = DataController.instance.StringtoIso8601(textReminder);
-
-    final _task = Task(
-        id: task.id,
-        description: task.description,
-        date: task.date,
-        reminder: _reminder,
-        complete: task.complete,
-        alert: alert);
-    return await DataController.instance.doEditTask(widget.plan, _task);
-  }
-
   Future<void> onNotice(BuildContext context, Task task) async {
     if (_dateTime != null) {
       if (_dateTime!.isBefore(DateTime.now())) {
         // Show snackbar.
         wrongWidget(context);
+        return;
       }
 
       final String done = await doUpdateAlert(context, task,
@@ -456,6 +455,21 @@ class _TasksPageState extends State<TasksPage> {
       // Show snackbar.
       wrongWidget(context);
     }
+  }
+
+  Future<String> doUpdateAlert(BuildContext context, Task task,
+      {required String textReminder, required bool alert}) async {
+    //Update a task.
+    final _reminder = DataController.instance.StringtoIso8601(textReminder);
+
+    final _task = Task(
+        id: task.id,
+        description: task.description,
+        date: task.date,
+        reminder: _reminder,
+        complete: task.complete,
+        alert: alert);
+    return await DataController.instance.doEditTask(widget.plan, _task);
   }
 
   Future<void> changeComplete(BuildContext context, Task task, bool? p0) async {

@@ -43,6 +43,7 @@ class AddTask extends StatelessWidget {
           ],
         ),
       ),
+      insetPadding: const EdgeInsets.all(8.0),
       actionsPadding:
           const EdgeInsets.only(left: 18.0, right: 18.0, bottom: 20.0),
       actionsOverflowAlignment: OverflowBarAlignment.end,
