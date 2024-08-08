@@ -25,3 +25,22 @@ Lưu ý bổ sung:
 3. Các trường hợp có thể bao gồm nhiều lần thử nghiệm (2 kẹp cùng 1 mũ nấm hoặc 2 kẹp trên 2 mũ nấm)
 
 Bảng tổng hợp này cung cấp cái nhìn tổng quan về các trường hợp thử nghiệm khác nhau, giúp dễ dàng so sánh và nắm bắt các yếu tố chính của mỗi trường hợp trong dự án Plantwave.
+
+Cũ ..................................................................................................................
+Dựa trên thông tin từ các hình ảnh, tôi sẽ tóm tắt thành một bảng tổng quát về các trường hợp thử nghiệm cho Plantwave như sau:
+
+| Phân loại | Trường hợp | Điều kiện | Thời gian thu thập | Dữ liệu thu thập |
+|-----------|------------|-----------|-------------------|-------------------|
+| Nấm tươi - Trong phòng | Case 1 | Trong phòng tiếng ồn | 120 phút | Sóng cây (GSR), Nhiệt độ, độ ẩm, CO2, Âm thanh, Hình chụp |
+| Nấm tươi - Trong phòng | Case 2 | Ngoài phòng tiếng ồn | 120 phút | Sóng cây (GSR), Nhiệt độ, độ ẩm, CO2, Âm thanh, Hình chụp |
+| Nấm tươi - Ngoài trời | Case 1 | Ngoài trời | 2 ngày | Sóng cây (GSR, ECG), Nhiệt độ, độ ẩm, CO2, Âm thanh, Hình chụp |
+| Nấm héo - Trong phòng | Case 1 | Trong phòng tiếng ồn | 2 ngày | Sóng cây (GSR), Nhiệt độ, độ ẩm, CO2, Âm thanh, Hình chụp |
+| Nấm héo - Ngoài trời | Case 1 | Ngoài trời | 2 ngày | Sóng cây (GSR, ECG), Nhiệt độ, độ ẩm, CO2, Âm thanh, Hình chụp |
+
+Lưu ý:
+- Mỗi trường hợp có thể có nhiều lần thử nghiệm (2 kẹp cùng 1 mũ nấm hoặc 2 kẹp trên 2 mũ nấm).
+- Các điều kiện môi trường như ánh sáng, tiếng ồn, nhiệt độ, độ ẩm có thể thay đổi và được ghi nhận.
+- Thời gian thu thập dữ liệu có thể là liên tục hoặc theo chu kỳ (ví dụ: 5 phút/lần, 30 giây/lần).
+- Bảng này tổng hợp thông tin chính, có thể có thêm chi tiết cụ thể cho từng trường hợp.
+
+Bảng này cung cấp cái nhìn tổng quan về các trường hợp thử nghiệm khác nhau, giúp dễ dàng so sánh và nắm bắt các yếu tố chính của mỗi trường hợp.
